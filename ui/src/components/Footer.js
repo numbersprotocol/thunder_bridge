@@ -24,12 +24,19 @@ const Footer = () => (
           </div>
           <div className="inner-footer-link-container">
             <span className="divider-2">{"|"}</span>
-            <a
+            {/* <a
               href="https://bridge.thundercore.com/"
               target="_blank"
               className="footer-link"
             >
               <FormattedMessage id="components.i18n.Footer.thundercoreBridge" />
+            </a> */}
+            <a
+              href="https://thundercore.zendesk.com/hc/en-us"
+              target="_blank"
+              className="footer-link"
+            >
+              <FormattedMessage id="components.i18n.Footer.helpCenter" />
             </a>
           </div>
         </div>
@@ -45,14 +52,14 @@ const Footer = () => (
             </a>
           </div>
           <div className="inner-footer-link-container">
-            <span className="divider-2">{"|"}</span>
+            {/* <span className="divider-2">{"|"}</span>
             <a
               href="https://thundercore.zendesk.com/hc/en-us"
               target="_blank"
               className="footer-link"
             >
               <FormattedMessage id="components.i18n.Footer.helpCenter" />
-            </a>
+            </a> */}
           </div>
         </div>
       </div>
