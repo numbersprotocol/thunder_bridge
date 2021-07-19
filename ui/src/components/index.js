@@ -1,7 +1,7 @@
 export { Header } from "./Header"
 export { default as Bridge } from "./Bridge"
 export { RelayEvents } from "./RelayEvents"
-export { Footer } from "./Footer"
+export { default as Footer } from "./Footer"
 export { default as SweetAlert } from "./SweetAlert"
 export { Loading } from "./Loading"
 export { Fade } from "./Fade"
