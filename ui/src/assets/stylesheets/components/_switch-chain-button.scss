@@ -1,37 +1,46 @@
+.switch-chain-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+}
+
 .switch-chain-wrapper {
+  display: flex;
+  margin-left: 10px;
+  margin-top: 12px;
 
-    margin-left: auto;
-    margin-top: 12px;
+  @media screen and (max-width: $tablet-width) {
+    margin-right: auto;
+  }
 
+  .switch-chain-button {
+    background-color: #514747;
+    border-radius: 3px;
+    color: $bridge-button-text-color;
+    display: block;
+    flex-shrink: 0;
+    height: 48px;
+    text-decoration: none;
+    padding: 0px 6px;
     @media screen and (max-width: $tablet-width) {
-        margin-right: auto;
+      height: 60px;
     }
 
-    .switch-chain-button {
-        background-color: #514747;
-        border-radius: 3px;
-        color: $bridge-button-text-color;
-        display: block;
-        flex-shrink: 0;
-        height: 48px;
-        text-decoration: none;
-        width: 300px;
-    
-        &:hover {
-            background-color: #514747;
-        }
-
-        .to {
-            color: #fee63b;
-            font-size: 12px;
-            margin-right: 12px;
-            font-weight: 100;
-        }
-
-        .text {
-            // font-family: NunitoSans;
-            font-weight: 700;
-            font-size: 14px;
-        }
+    &:hover {
+      background-color: #514747;
     }
+
+    .to {
+      color: #fee63b;
+      font-size: 12px;
+      margin-right: 12px;
+      font-weight: 100;
+    }
+
+    .text {
+      // font-family: NunitoSans;
+      font-weight: 700;
+      font-size: 14px;
+    }
+  }
 }

@@ -2,30 +2,95 @@
   @extend %full-width;
   background-color: $footer-background-color;
   bottom: 0;
+  display: flex;
+  flex-direction: column;
   color: $footer-text-color;
-  padding: 18px 0;
-
-  .footer-logo-container {
-    display: flex;
-    align-items: center;
+  padding: 18px 0 25px 0px;
+  @media screen and (min-width: $tablet-width) {
+    height: 10vh;
+  }
+  @media screen and (max-width: $tablet-width) {
+    height: 25vh;
+  }
+  @media screen and (max-width: 350px) {
+    height: 32vh;
   }
 
   .container {
-    align-items: center;
     display: flex;
+    align-items: center;
     flex-wrap: wrap;
+    flex-direction: row;
     justify-content: space-between;
 
     @media screen and (max-width: $tablet-width) {
+      width: 100%;
       flex-direction: column;
+    }
+
+    .link-container {
+      display: flex;
+      @media screen and (min-width: $tablet-width) {
+        flex-direction: row;
+      }
+      @media screen and (max-width: $tablet-width) {
+        width: 100%;
+        flex-direction: column;
+      }
+      .outer-footer-link-container {
+        display: flex;
+        flex-direction: row;
+        @media screen and (max-width: $tablet-width) {
+          width: 100%;
+          justify-content: space-between;
+        }
+      }
+      .inner-footer-link-container {
+        display: flex;
+        flex-direction: row;
+        flex: 1;
+      }
+      .divider-1 {
+        display: flex;
+        margin-right: 12px;
+        @media screen and (max-width: $tablet-width) {
+          margin: 0 8px 0 19%;
+        }
+        @media screen and (max-width: 350px) {
+          margin: 0 8px 0 15%;
+        }
+      }
+      .divider-2 {
+        display: flex;
+        margin-right: 12px;
+        @media screen and (max-width: $tablet-width) {
+          margin-right: 8px;
+        }
+        @media screen and (max-width: 350px) {
+          margin-right: 8px;
+        }
+      }
+      .footer-link {
+        @media screen and (min-width: $tablet-width) {
+          width: max-content;
+        }
+        display: flex;
+        font-size: 16px;
+        font-weight: 400;
+        margin-right: 24px;
+      }
     }
   }
 
   p {
-    font-size: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    color: $footer-text-color;
+    text-align: center;
+    margin-top: 40px;
 
     @media screen and (max-width: $tablet-width) {
-      margin-top: 15px;
+      margin-top: 35px;
     }
   }
 
@@ -33,13 +98,13 @@
     order: 2;
 
     @media screen and (max-width: $tablet-width) {
-      margin-top: 15px;
+      margin-top: 45px;
       order: 1;
     }
   }
 
   &-logo {
-    background-image: url('#{ $logo-image }');
+    background-image: url("#{ $logo-image }");
     background-repeat: no-repeat;
     background-size: contain;
     display: block;

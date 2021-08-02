@@ -1,37 +1,72 @@
-import React from "react";
-import { getTokenList } from "../stores/utils/getBridgeAddress";
-import { RenameToken } from "./utils/renameToken";
-import { bridgeType } from "../stores/utils/bridgeMode";
+import React from "react"
+import { getTokenList } from "../stores/utils/getBridgeAddress"
+import { RenameToken } from "./utils/renameToken"
+import { bridgeType } from "../stores/utils/bridgeMode"
+import { injectIntl } from "react-intl"
 
-export const BridgeChoose = (props) => {
-  const tokens = getTokenList();
-  const chooseItems = [];
+const BridgeChoose = ({
+  setNewTokenHandler,
+  web3Store,
+  alert,
+  isHome,
+  foreignStore,
+  intl,
+  resetForm,
+}) => {
+  const tokens = getTokenList()
+  const chooseItems = []
 
   const direction = {
     fromHome: 0,
-    fromForeign: 1
+    fromForeign: 1,
   }
+  const ERC20 = "ERC20"
+  const BEP20 = "BEP20"
+  const HRC20 = "HRC20"
 
   const getPrefix = (token) => {
     if (token === "TT") {
-      return bridgeType === "eth" ? "TT" : "BSC";
+      switch (bridgeType) {
+        case "eth":
+          return ERC20
+        case "bsc":
+          return BEP20
+        case "heco":
+          return HRC20
+        default:
+          return BEP20
+      }
     }
-    return "TT";
-  };
+    return "TT"
+  }
+
+  const getForeignToken = (token) => {
+    if (token === "TT") return token
+    switch (bridgeType) {
+      case "eth":
+        return `${ERC20}-${token}`
+      case "bsc":
+        return `${BEP20}-${token}`
+      case "heco":
+        return `${HRC20}-${token}`
+      default:
+        return `${BEP20}-${token}`
+    }
+  }
 
   const setItems = (token, type) => {
     if (type === 0) {
       chooseItems.push({
-        from: token,
+        from: getForeignToken(token),
         to: `${getPrefix(token)}-${token}`,
-        direction: token === "TT" ? direction.fromHome : direction.fromForeign
+        direction: token === "TT" ? direction.fromHome : direction.fromForeign,
       })
     }
     if (type === 1) {
       chooseItems.push({
         from: `${getPrefix(token)}-${token}`,
-        to: token,
-        direction: token === "TT" ? direction.fromForeign : direction.fromHome
+        to: getForeignToken(token),
+        direction: token === "TT" ? direction.fromForeign : direction.fromHome,
       })
     }
   }
@@ -47,60 +82,92 @@ export const BridgeChoose = (props) => {
   }
 
   const chooseLogoClass = (c) => {
-    return "bridge-choose-logo logo-" + c.toLowerCase();
-  };
+    return "bridge-choose-logo logo-" + c.toLowerCase()
+  }
 
   const renderAdditionalLogoInfo = (item) => {
-    if (item === "BSC-TT") return <div className="logo-info">BEP 20</div>;
-    return null;
-  };
+    if (item === "BEP20-TT") return <div className="logo-info">BEP20</div>
+    if (item === "ERC20-TT") return <div className="logo-info">ERC20</div>
+    if (item === "HRC20-TT") return <div className="logo-info">HRC20</div>
+    return null
+  }
 
   const handleOptionChange = (mode) => {
-    if (!props.isHome) {
+    resetForm()
+
+    if (!isHome) {
       if (mode.direction === direction.fromHome) {
-        props.alert.pushError(
-          `Please, change network to ${
-            props.web3Store.homeNet.name
-          } to transfer ${RenameToken(mode.from)}`,
-          props.alert.WRONG_NETWORK_ERROR,
-          props.web3Store.homeNet
-          );
+        alert.pushError(
+          intl.formatMessage(
+            { id: "components.i18n.BridgeChoose.changeNetworkTransfer" },
+            {
+              networkName: web3Store.homeNet.name,
+              tokenName: RenameToken(filterNativeToken(mode.from)),
+            }
+          ),
+          alert.WRONG_NETWORK_ERROR,
+          web3Store.homeNet
+        )
       } else {
-        props.alert.setLoading(true);
-        props.setNewTokenHandler(mode.to === "TT" ? "TT" : mode.from);
+        alert.setLoading(true)
+        setNewTokenHandler(mode.to === "TT" ? "TT" : mode.from.split("-")[1])
       }
     } else {
       if (mode.direction === direction.fromForeign) {
-        props.alert.pushError(
-          `Please, change network to ${
-            props.web3Store.foreignNet.name
-          } to transfer ${RenameToken(mode.from)}`,
-          props.alert.WRONG_NETWORK_ERROR,
-          props.web3Store.foreignNet
-          );
+        alert.pushError(
+          intl.formatMessage(
+            { id: "components.i18n.BridgeChoose.changeNetworkTransfer" },
+            {
+              networkName: web3Store.foreignNet.name,
+              tokenName: RenameToken(filterNativeToken(mode.from)),
+            }
+          ),
+          alert.WRONG_NETWORK_ERROR,
+          web3Store.foreignNet
+        )
       } else {
-        props.alert.setLoading(true);
-        props.setNewTokenHandler(mode.from === "TT" ? "TT" : mode.to);
+        alert.setLoading(true)
+        setNewTokenHandler(mode.from === "TT" ? "TT" : mode.to.split("-")[1])
       }
     }
-  };
+  }
 
   const verifyTokenMatch = (item, dir) => {
-    if (dir === direction.fromHome) return item.to === RenameToken(props.foreignStore.symbol) || item.to === "BSC-TT" && props.foreignStore.symbol === "TT"
-    return item.from === RenameToken(props.foreignStore.symbol) || item.to === "TT" && props.foreignStore.symbol === "TT"
+    if (dir === direction.fromHome)
+      return (
+        item.to.split("-")[1] === RenameToken(foreignStore.symbol) ||
+        (item.to.split("-")[1] === "BEP20-TT" && foreignStore.symbol === "TT")
+      )
+    return (
+      item.from.split("-")[1] === RenameToken(foreignStore.symbol) ||
+      (item.to.split("-")[1] === "ERC20-TT" && foreignStore.symbol === "TT")
+    )
   }
 
   const handleChecked = (item) => {
-    if (props.isHome) {
-      if (item.direction === direction.fromHome && verifyTokenMatch(item, direction.fromHome)) {
-        return true;
+    if (isHome) {
+      if (
+        item.direction === direction.fromHome &&
+        verifyTokenMatch(item, direction.fromHome)
+      ) {
+        return true
       }
     } else {
-      if (item.direction === direction.fromForeign && verifyTokenMatch(item, direction.fromForeign)) {
-        return true;
+      if (
+        item.direction === direction.fromForeign &&
+        verifyTokenMatch(item, direction.fromForeign)
+      ) {
+        return true
       }
     }
-  };
+  }
+
+  const filterNativeToken = (token) => {
+    if (token === `${ERC20}-ETH`) return "ETH"
+    if (token === `${BEP20}-BNB`) return "BNB"
+    if (token === `${HRC20}-HT`) return "HT"
+    return RenameToken(token)
+  }
 
   return (
     <div className="bridge-choose">
@@ -116,21 +183,28 @@ export const BridgeChoose = (props) => {
             />
             <span className="bridge-choose-container">
               <span className="bridge-choose-logo-container">
-                <span className={chooseLogoClass(item.from)} />
+                <span
+                  className={chooseLogoClass(filterNativeToken(item.from))}
+                />
                 {renderAdditionalLogoInfo(item.from)}
               </span>
               <span className="bridge-choose-text">
-                {RenameToken(item.from)} <i className="bridge-choose-arrow" />{" "}
-                {RenameToken(item.to)}
+                {filterNativeToken(item.from)}
+              </span>{" "}
+              <i className="bridge-choose-arrow" />{" "}
+              <span className="bridge-choose-text">
+                {filterNativeToken(item.to)}
               </span>
               <span className="bridge-choose-logo-container">
-                <span className={chooseLogoClass(item.to)} />
+                <span className={chooseLogoClass(filterNativeToken(item.to))} />
                 {renderAdditionalLogoInfo(item.to)}
               </span>
             </span>
           </label>
-        );
+        )
       })}
     </div>
-  );
-};
+  )
+}
+
+export default injectIntl(BridgeChoose)

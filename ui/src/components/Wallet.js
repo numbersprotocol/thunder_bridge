@@ -1,13 +1,20 @@
-import React from 'react'
-import { inject, observer } from 'mobx-react'
-import { WalletIcon } from './menu-icons/WalletIcon'
+import React from "react"
+import { inject, observer } from "mobx-react"
+import { WalletIcon } from "./menu-icons/WalletIcon"
+import { FormattedMessage } from "react-intl"
 
-@inject('RootStore')
+@inject("RootStore")
 @observer
 export class Wallet extends React.Component {
   render() {
-    const { web3Store, homeStore, foreignStore, alertStore } = this.props.RootStore
-    const isHome = web3Store.metamaskNet.id.toString() === web3Store.homeNet.id.toString()
+    const {
+      web3Store,
+      homeStore,
+      foreignStore,
+      alertStore,
+    } = this.props.RootStore
+    const isHome =
+      web3Store.metamaskNet.id.toString() === web3Store.homeNet.id.toString()
     const address = web3Store.defaultAccount.address
     const explorerAddressUrl = isHome
       ? homeStore.getExplorerAddressUrl(address)
@@ -17,18 +24,25 @@ export class Wallet extends React.Component {
       : foreignStore.getDailyQuotaCompleted()
     const width = `${completed}%`
 
-    const wallet =
-      web3Store.defaultAccount.address !== '' && web3Store.defaultAccount.address !== undefined ? (
-        <a href={explorerAddressUrl} target="_blank" className="wallet-text wallet-link">
-          {web3Store.defaultAccount.address.slice(0, 17).concat('...')}
+    const wallet = (
+      <>
+        <a
+          href={explorerAddressUrl}
+          target="_blank"
+          className="wallet-text wallet-link"
+        >
+          {web3Store.defaultAccount.address.slice(0, 15).concat("...")}
         </a>
-      ) : (
-        <span className="wallet-text">
-          Login with <span className="wallet-text-metamask">wallet</span>
-        </span>
-      )
+        <div className="daily-quota-container">
+          {web3Store.metamaskNet.id && (
+            <div className="daily-quota-progress" style={{ width }} />
+          )}
+        </div>
+      </>
+    )
 
-    return (
+    return web3Store.defaultAccount.address !== "" &&
+      web3Store.defaultAccount.address !== undefined ? (
       <div
         className="header-wallet"
         onMouseEnter={() => alertStore.setShowDailyQuotaInfo(true)}
@@ -36,14 +50,13 @@ export class Wallet extends React.Component {
       >
         <div className="wallet-container">
           <span className="wallet-icon">{<WalletIcon />}</span>
-          <div className="wallet-info">
-            {wallet}
-            <div className="daily-quota-container">
-              {web3Store.metamaskNet.id && <div className="daily-quota-progress" style={{ width }} />}
-            </div>
-          </div>
+          <div className="wallet-info">{wallet}</div>
         </div>
       </div>
+    ) : (
+      <span className="wallet-connect">
+        <FormattedMessage id="components.i18n.Wallet.connectWallet" />
+      </span>
     )
   }
 }
