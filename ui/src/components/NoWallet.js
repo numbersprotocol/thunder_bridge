@@ -39,7 +39,7 @@ export class NoWallet extends Component {
             <div className="noWallet-buttons">
               <a
                 className="noWallet-metamask"
-                href="https://support-center.thundercore.com/docs/metamask/"
+                href="https://thundercore.zendesk.com/hc/en-us/articles/900006699343-MetaMask"
                 rel="noopener noreferrer"
                 target="_blank"
               >

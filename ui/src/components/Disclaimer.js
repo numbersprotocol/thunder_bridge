@@ -19,7 +19,7 @@ export const Disclaimer = ({ onConfirmation }) => (
       <div className="disclaimer-buttons">
         <a
           className="disclaimer-metamask"
-          href="https://support-center.thundercore.com/docs/metamask/"
+          href="https://thundercore.zendesk.com/hc/en-us/articles/900006699343-MetaMask"
           rel="noopener noreferrer"
           target="_blank"
         >
