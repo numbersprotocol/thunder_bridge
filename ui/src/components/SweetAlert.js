@@ -15,13 +15,12 @@ class SweetAlert extends React.Component {
     if (alertStore.alerts.length > 0) {
       const alert = alertStore.alerts.slice()[0]
       const isWrongNetwork = alert.messageType == alertStore.WRONG_NETWORK_ERROR
+
       const isNotEthereumChains = alert.info.id !== 1 && alert.info.id !== 42 // check not eth network. For eth, check this PR: https://github.com/ethereum/EIPs/pull/3326
+      const isSwitchNetworkSupported =
+        window.ethereum && (!isMobile || window.ethereum.isImToken)
       const isAddNetwork =
-        isWrongNetwork &&
-        window.ethereum &&
-        window.ethereum.isMetaMask &&
-        !isMobile &&
-        isNotEthereumChains
+        isWrongNetwork && isSwitchNetworkSupported && isNotEthereumChains
       const button = isAddNetwork
         ? {
             button: {
@@ -35,6 +34,7 @@ class SweetAlert extends React.Component {
           }
         : {}
       const swalConfig = { ...alert, ...button }
+
       swal(swalConfig).then((isButtonClicked) => {
         alertStore.remove(alert)
         if (isWrongNetwork) {

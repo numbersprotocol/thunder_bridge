@@ -265,8 +265,8 @@ class Web3Store {
         category: "Account",
         action: "AutoSwitchNetwork",
       })
-
-      if (window.ethereum.isMetaMask) {
+  
+      if (window.ethereum) {
         window.ethereum
           .request({
             method: "wallet_addEthereumChain",
