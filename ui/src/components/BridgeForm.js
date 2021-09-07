@@ -80,9 +80,11 @@ export const BridgeForm = ({
                   <FormattedMessage id="components.i18n.NetworkDetails.minAmountPerTx" />
                 </span>
                 <span className="threshold-description">
-                  {parseInt(minPerTx, 10) < 0.00001
+                  {Number(minPerTx) < 0.00001
                     ? "0"
-                    : numeral(minPerTx).format("0,0", Math.floor)}{" "}
+                    : Number(minPerTx)
+                        .toFixed(5)
+                        .replace(/(\.0+|0+)$/, "")}{" "}
                   {RenameToken(currency)}
                 </span>
               </p>
