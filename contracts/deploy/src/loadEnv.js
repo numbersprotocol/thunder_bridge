@@ -7,7 +7,7 @@ const envalid = require('envalid')
 const { ZERO_ADDRESS } = require('./constants')
 
 // Validations and constants
-const validBridgeModes = ['NATIVE_TO_ERC', 'ERC_TO_ERC', 'ERC_TO_NATIVE']
+const validBridgeModes = ['NATIVE_TO_ERC', 'ERC_TO_ERC', 'ERC_TO_NATIVE', 'ERC677_TO_ERC20']
 const bigNumValidator = envalid.makeValidator(x => toBN(x))
 const validateAddress = address => {
   if (isAddress(address)) {
@@ -72,6 +72,15 @@ if (BRIDGE_MODE === 'ERC_TO_ERC') {
     BRIDGEABLE_TOKEN_NAME: envalid.str(),
     BRIDGEABLE_TOKEN_SYMBOL: envalid.str(),
     BRIDGEABLE_TOKEN_DECIMALS: envalid.num()
+  }
+}
+if (BRIDGE_MODE === 'ERC677_TO_ERC20') {
+  validations = {
+    ...validations,
+    BRIDGEABLE_TOKEN_NAME: envalid.str(),
+    BRIDGEABLE_TOKEN_SYMBOL: envalid.str(),
+    BRIDGEABLE_TOKEN_DECIMALS: envalid.num(),
+    BRIDGEABLE_TOKEN_TOTALSUPPLY: bigNumValidator()
   }
 }
 

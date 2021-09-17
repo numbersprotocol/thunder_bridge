@@ -11,12 +11,15 @@ const BridgeValidators = require('../../../build/contracts/BridgeValidators.json
 const ERC677InitializableToken = require('../../../build/contracts/ERC677InitializableToken.json')
 const TokenProxy = require('../../../build/contracts/TokenProxy.json')
 const { ZERO_ADDRESS } = require('../constants')
+const { deployErc20Token } = require('../utils/deployERC20Token')
 
 const VALIDATORS = env.VALIDATORS.split(' ')
 
 let HomeBridge
 if (env.BRIDGE_MODE === 'ERC_TO_NATIVE') {
   HomeBridge = require('../../../build/contracts/HomeBridgeNativeToErcWithFee.json')
+} else if (env.BRIDGE_MODE === 'ERC677_TO_ERC20') {
+  HomeBridge = require('../../../build/contracts/HomeBridgeErc677ToErc20.json')
 } else {
   HomeBridge = require('../../../build/contracts/HomeBridgeErcToErcWithFee.json')
 }
@@ -43,7 +46,7 @@ const {
 
 const DEPLOYMENT_ACCOUNT_ADDRESS = privateKeyToAddress(DEPLOYMENT_ACCOUNT_PRIVATE_KEY)
 
-async function deployHome() {
+async function deployHome(erc20Address) {
   let homeNonce = await web3Home.eth.getTransactionCount(DEPLOYMENT_ACCOUNT_ADDRESS)
   console.log('deploying storage for home validators')
   const storageValidatorsHome = await deployContract(EternalStorageProxy, [], {
@@ -138,7 +141,12 @@ async function deployHome() {
   homeNonce++
 
   let initializableToken
-  if (env.BRIDGE_MODE !== 'ERC_TO_NATIVE') {
+  let erc20token = erc20Address
+  if (env.BRIDGE_MODE === 'ERC677_TO_ERC20' && !erc20token) {
+    let ret = await deployErc20Token(homeBridgeStorage.options.address)
+    erc20token = ret.erc20tokenAddress
+    homeNonce = ret.homeNonce
+  } else if (env.BRIDGE_MODE !== 'ERC_TO_NATIVE') {
     console.log('\n[Home] deploying initializable token')
     initializableToken = await deployContract(
       ERC677InitializableToken,
@@ -237,6 +245,24 @@ async function deployHome() {
       .encodeABI({
         from: DEPLOYMENT_ACCOUNT_ADDRESS
       })
+  } else if (env.BRIDGE_MODE === 'ERC677_TO_ERC20') {
+    initializeHomeBridgeData = await homeBridgeImplementation.methods
+      .initialize(
+        storageValidatorsHome.options.address,
+        HOME_DAILY_LIMIT,
+        HOME_MAX_AMOUNT_PER_TX,
+        HOME_MIN_AMOUNT_PER_TX,
+        HOME_GAS_PRICE,
+        HOME_REQUIRED_BLOCK_CONFIRMATIONS,
+        erc20token,
+        FOREIGN_DAILY_LIMIT,
+        FOREIGN_MAX_AMOUNT_PER_TX,
+        HOME_BRIDGE_OWNER,
+        HOME_FEE_PERCENT
+      )
+      .encodeABI({
+        from: DEPLOYMENT_ACCOUNT_ADDRESS
+      })
   } else {
     initializeHomeBridgeData = await homeBridgeImplementation.methods
       .initialize(
@@ -285,16 +311,24 @@ async function deployHome() {
   await setupHomeBridgeWithFee(homeBridgeStorage.options.address, homeBridgeImplementation)
 
   console.log('\nHome Deployment Bridge completed\n')
+
+  let homeBridgeTokenAddress
+
+  if (env.BRIDGE_MODE === 'ERC_TO_NATIVE') {
+    homeBridgeTokenAddress = homeBridgeStorage.options.address
+  } else if (env.BRIDGE_MODE === 'ERC677_TO_ERC20') {
+    homeBridgeTokenAddress = erc20token
+  } else {
+    homeBridgeTokenAddress = initializableToken.options.address
+  }
+
   return {
     homeBridge: {
       address: homeBridgeStorage.options.address,
       deployedBlockNumber: Web3Utils.hexToNumber(homeBridgeStorage.deployedBlockNumber)
     },
     erc677: {
-      address:
-        env.BRIDGE_MODE === 'ERC_TO_NATIVE'
-          ? homeBridgeStorage.options.address
-          : initializableToken.options.address
+      address: homeBridgeTokenAddress
     }
   }
 }
