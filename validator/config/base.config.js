@@ -11,8 +11,8 @@ const foreignErcErcAbi = require('../abis/ForeignBridgeErcToErc.abi.json')
 const homeErcNativeAbi = require('../abis/HomeBridgeErcToNative.abi.json')
 const foreignErcNativeAbi = require('../abis/ForeignBridgeErcToNative.abi.json')
 
-const homeErc677Erc20Abi = require('../abis/HomeBridgeErc677ToErc20.json')
-const foreignErc677Erc20Abi = require('../abis/ForeignBridgeErc677ToErc20.json')
+const homeErc677Erc677Abi = require('../abis/HomeBridgeErc677ToErc677WithFee.json').abi
+const foreignErc677Erc677Abi = require('../abis/ForeignBridgeErc677ToErc677.json').abi
 
 let homeAbi
 let foreignAbi
@@ -29,7 +29,7 @@ const bigNumValidator = envalid.makeValidator((x) => (x ? toBN(x) : toBN(0)))
 
 let validations = {
   ALLOW_HTTP: envalid.str({ default: 'no' }),
-  BRIDGE_MODE: envalid.str({ choices: ['NATIVE_TO_ERC', 'ERC_TO_ERC', 'ERC_TO_NATIVE', 'ERC677_TO_ERC20'] }),
+  BRIDGE_MODE: envalid.str({ choices: ['NATIVE_TO_ERC', 'ERC_TO_ERC', 'ERC_TO_NATIVE', 'ERC677_TO_ERC677'] }),
   ERC20_TOKEN_ADDRESS: validateAddress(),
   EXTRA_GAS_PERCENTAGE: envalid.num({ default: 1 }),
   FOREIGN_BLOCK_CONFIRMATION: envalid.num({ default: 6 }),
@@ -80,9 +80,9 @@ switch (env.BRIDGE_MODE) {
     foreignAbi = foreignErcNativeAbi
     id = 'erc-native'
     break
-  case 'ERC677_TO_ERC20':
-    homeAbi = homeErc677Erc20Abi.abi
-    foreignAbi = foreignErc677Erc20Abi.abi
+  case 'ERC677_TO_ERC677':
+    homeAbi = homeErc677Erc677Abi
+    foreignAbi = foreignErc677Erc677Abi
     id = 'erc-erc'
     break
   default:

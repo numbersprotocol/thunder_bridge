@@ -17,12 +17,12 @@ function writeToFile(homeBridge, homeBridgeToken, foreignBridge, foreignBridgeTo
       {
         homeBridge: {
           ...homeBridge,
-          homeBridgeToken
+          erc677: homeBridgeToken
         },
         foreignBridge: {
           ...foreignBridge
         },
-        foreignBridgeToken
+        erc20Token: foreignBridgeToken
       },
       null,
       4
@@ -31,28 +31,28 @@ function writeToFile(homeBridge, homeBridgeToken, foreignBridge, foreignBridgeTo
   console.log('Contracts Deployment have been saved to `data/deployed.json`')
 }
 
-async function deployErc677ToErc20(erc677TokenAddress, erc20TokenAddress) {
+async function deployErc677ToErc677(foreignTokenAddress, homeTokenAddress) {
   const deployHome = require('./src/erc_to_erc/home')
   const deployForeign = require('./src/erc_to_erc/foreign')
 
   // TODO: refactor object key later
-  const { homeBridge, erc677 } = await deployHome(erc20TokenAddress)
-  const { foreignBridge, erc20Token } = await deployForeign(erc677TokenAddress)
+  const { homeBridge, erc677 } = await deployHome(homeTokenAddress)
+  const { foreignBridge, erc20Token } = await deployForeign(foreignTokenAddress)
 
   writeToFile(homeBridge, erc677, foreignBridge, erc20Token)
 }
 
-async function deployErcToErc(erc20TokenAddress) {
+async function deployErcToErc(foreignTokenAddress) {
   const deployHome = require('./src/erc_to_erc/home')
   const deployForeign = require('./src/erc_to_erc/foreign')
 
   const { homeBridge, erc677 } = await deployHome('')
-  const { foreignBridge, erc20Token } = await deployForeign(erc20TokenAddress)
+  const { foreignBridge, erc20Token } = await deployForeign(foreignTokenAddress)
 
   writeToFile(homeBridge, erc677, foreignBridge, erc20Token)
 }
 
 module.exports = {
   deployErcToErc,
-  deployErc677ToErc20
+  deployErc677ToErc677
 }

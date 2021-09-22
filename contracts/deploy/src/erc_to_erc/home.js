@@ -9,17 +9,18 @@ const { web3Home, deploymentPrivateKey, HOME_RPC_URL } = require('../web3')
 const EternalStorageProxy = require('../../../build/contracts/EternalStorageProxy.json')
 const BridgeValidators = require('../../../build/contracts/BridgeValidators.json')
 const ERC677InitializableToken = require('../../../build/contracts/ERC677InitializableToken.json')
+const ERC677BridgeToken = require('../../../build/contracts/ERC677BridgeToken.json')
 const TokenProxy = require('../../../build/contracts/TokenProxy.json')
 const { ZERO_ADDRESS } = require('../constants')
-const { deployErc20Token } = require('../utils/deployERC20Token')
+const deployErc677Token = require('../utils/deployERC20Token')
 
 const VALIDATORS = env.VALIDATORS.split(' ')
 
 let HomeBridge
 if (env.BRIDGE_MODE === 'ERC_TO_NATIVE') {
   HomeBridge = require('../../../build/contracts/HomeBridgeNativeToErcWithFee.json')
-} else if (env.BRIDGE_MODE === 'ERC677_TO_ERC20') {
-  HomeBridge = require('../../../build/contracts/HomeBridgeErc677ToErc20.json')
+} else if (env.BRIDGE_MODE === 'ERC677_TO_ERC677') {
+  HomeBridge = require('../../../build/contracts/HomeBridgeErc677ToErc677WithFee.json')
 } else {
   HomeBridge = require('../../../build/contracts/HomeBridgeErcToErcWithFee.json')
 }
@@ -46,7 +47,7 @@ const {
 
 const DEPLOYMENT_ACCOUNT_ADDRESS = privateKeyToAddress(DEPLOYMENT_ACCOUNT_PRIVATE_KEY)
 
-async function deployHome(erc20Address) {
+async function deployHome(homeTokenAddress) {
   let homeNonce = await web3Home.eth.getTransactionCount(DEPLOYMENT_ACCOUNT_ADDRESS)
   console.log('deploying storage for home validators')
   const storageValidatorsHome = await deployContract(EternalStorageProxy, [], {
@@ -141,11 +142,24 @@ async function deployHome(erc20Address) {
   homeNonce++
 
   let initializableToken
-  let erc20token = erc20Address
-  if (env.BRIDGE_MODE === 'ERC677_TO_ERC20' && !erc20token) {
-    let ret = await deployErc20Token(homeBridgeStorage.options.address)
-    erc20token = ret.erc20tokenAddress
-    homeNonce = ret.homeNonce
+  let tokenAddress = homeTokenAddress
+  if (env.BRIDGE_MODE === 'ERC677_TO_ERC677' && !tokenAddress) {
+    let ret = await deployErc677Token('HOME')
+    tokenAddress = ret.erc677tokenAddress
+    homeNonce = await web3Home.eth.getTransactionCount(DEPLOYMENT_ACCOUNT_ADDRESS)
+    let token = new web3Home.eth.Contract(ERC677BridgeToken.abi, tokenAddress)
+    const setBridgeContractData = await token.methods
+      .setBridgeContract(homeBridgeStorage.options.address)
+      .encodeABI({ from: DEPLOYMENT_ACCOUNT_ADDRESS })
+    const setBridgeContract = await sendRawTxHome({
+      data: setBridgeContractData,
+      nonce: homeNonce,
+      to: tokenAddress,
+      privateKey: deploymentPrivateKey,
+      url: HOME_RPC_URL
+    })
+    assert.strictEqual(Web3Utils.hexToNumber(setBridgeContract.status), 1, 'Transaction Failed')
+    homeNonce++
   } else if (env.BRIDGE_MODE !== 'ERC_TO_NATIVE') {
     console.log('\n[Home] deploying initializable token')
     initializableToken = await deployContract(
@@ -245,7 +259,7 @@ async function deployHome(erc20Address) {
       .encodeABI({
         from: DEPLOYMENT_ACCOUNT_ADDRESS
       })
-  } else if (env.BRIDGE_MODE === 'ERC677_TO_ERC20') {
+  } else if (env.BRIDGE_MODE === 'ERC677_TO_ERC677') {
     initializeHomeBridgeData = await homeBridgeImplementation.methods
       .initialize(
         storageValidatorsHome.options.address,
@@ -254,7 +268,7 @@ async function deployHome(erc20Address) {
         HOME_MIN_AMOUNT_PER_TX,
         HOME_GAS_PRICE,
         HOME_REQUIRED_BLOCK_CONFIRMATIONS,
-        erc20token,
+        tokenAddress,
         FOREIGN_DAILY_LIMIT,
         FOREIGN_MAX_AMOUNT_PER_TX,
         HOME_BRIDGE_OWNER,
@@ -316,8 +330,8 @@ async function deployHome(erc20Address) {
 
   if (env.BRIDGE_MODE === 'ERC_TO_NATIVE') {
     homeBridgeTokenAddress = homeBridgeStorage.options.address
-  } else if (env.BRIDGE_MODE === 'ERC677_TO_ERC20') {
-    homeBridgeTokenAddress = erc20token
+  } else if (env.BRIDGE_MODE === 'ERC677_TO_ERC677') {
+    homeBridgeTokenAddress = tokenAddress
   } else {
     homeBridgeTokenAddress = initializableToken.options.address
   }

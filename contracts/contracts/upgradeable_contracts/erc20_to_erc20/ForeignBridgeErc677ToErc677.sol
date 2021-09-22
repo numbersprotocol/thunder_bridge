@@ -5,9 +5,9 @@ import "../ERC677Bridge.sol";
 import "../../ERC677Receiver.sol";
 import "../../IBurnableMintableERC677Token.sol";
 
-contract ForeignBridgeErc677ToErc20 is ForeignBridgeErcToErcV3, ERC677Receiver, ERC677Bridge {
+contract ForeignBridgeErc677ToErc677 is ForeignBridgeErcToErcV3, ERC677Receiver, ERC677Bridge {
     function getBridgeMode() public pure returns(bytes4 _data) {
-        return bytes4(keccak256(abi.encodePacked("erc677-to-erc20-core")));
+        return bytes4(keccak256(abi.encodePacked("erc677-to-erc677-core")));
     }
 
     function erc20token() public view returns (ERC20Basic) {

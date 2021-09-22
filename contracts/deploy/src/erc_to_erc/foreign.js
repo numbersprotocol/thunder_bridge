@@ -14,9 +14,9 @@ let ForeignBridge
 if (env.BRIDGE_MODE === 'NATIVE_TO_ERC') {
   console.log('Deploy ForeignBridgeWithNativeToken contract')
   ForeignBridge = require('../../../build/contracts/ForeignBridgeWithNativeToken.json')
-} else if (env.BRIDGE_MODE === 'ERC677_TO_ERC20') {
-  console.log('Deploy ForeignBridgeErc677ToErc20 contract')
-  ForeignBridge = require('../../../build/contracts/ForeignBridgeErc677ToErc20.json')
+} else if (env.BRIDGE_MODE === 'ERC677_TO_ERC677') {
+  console.log('Deploy ForeignBridgeErc677ToErc677 contract')
+  ForeignBridge = require('../../../build/contracts/ForeignBridgeErc677ToErc677.json')
 } else if (env.BRIDGE_MODE === 'ERC_TO_ERC') {
   console.log('Deploy ForeignBridgeErcToErcV3 contract')
   ForeignBridge = require('../../../build/contracts/ForeignBridgeErcToErcV3.json')
@@ -48,7 +48,7 @@ const {
 
 const DEPLOYMENT_ACCOUNT_ADDRESS = privateKeyToAddress(DEPLOYMENT_ACCOUNT_PRIVATE_KEY)
 
-async function deployForeign(erc20TokenAddress) {
+async function deployForeign(foreignTokenAddress) {
   let foreignNonce = await web3Foreign.eth.getTransactionCount(DEPLOYMENT_ACCOUNT_ADDRESS)
   console.log('========================================')
   console.log('deploying ForeignBridge')
@@ -177,7 +177,7 @@ async function deployForeign(erc20TokenAddress) {
   foreignNonce++
 
   let initializableToken
-  if (env.BRIDGE_MODE === 'ERC_TO_NATIVE' || env.BRIDGE_MODE == 'ERC677_TO_ERC20') {
+  if (env.BRIDGE_MODE === 'ERC_TO_NATIVE' || env.BRIDGE_MODE == 'ERC677_TO_ERC677') {
     console.log('\n[Foreign] deploying initializable token')
     initializableToken = await deployContract(
       ERC677InitializableToken,
@@ -269,7 +269,7 @@ async function deployForeign(erc20TokenAddress) {
     initializeFBridgeData = await foreignBridgeImplementation.methods
       .initialize(
         storageValidatorsForeign.options.address,
-        erc20TokenAddress,
+        foreignTokenAddress,
         FOREIGN_REQUIRED_BLOCK_CONFIRMATIONS,
         FOREIGN_GAS_PRICE,
         FOREIGN_MAX_AMOUNT_PER_TX,
@@ -283,7 +283,7 @@ async function deployForeign(erc20TokenAddress) {
         from: DEPLOYMENT_ACCOUNT_ADDRESS
       })
   } else {
-    // ERC_TO_NATIVE and ERC677_TO_ERC20
+    // ERC_TO_NATIVE and ERC677_TO_ERC677
     initializeFBridgeData = await foreignBridgeImplementation.methods
       .initialize(
         storageValidatorsForeign.options.address,
@@ -330,8 +330,8 @@ async function deployForeign(erc20TokenAddress) {
   const ercTokenAddress = {
     ERC_TO_NATIVE: initializableToken ? initializableToken.options.address : undefined,
     NATIVE_TO_ERC: foreignBridgeStorage.options.address,
-    ERC_TO_ERC: erc20TokenAddress,
-    ERC677_TO_ERC20: initializableToken ? initializableToken.options.address : undefined
+    ERC_TO_ERC: foreignTokenAddress,
+    ERC677_TO_ERC677: initializableToken ? initializableToken.options.address : undefined
   }
 
   return {
