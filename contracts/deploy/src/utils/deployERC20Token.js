@@ -31,7 +31,7 @@ const {
 
 const DEPLOYMENT_ACCOUNT_ADDRESS = privateKeyToAddress(DEPLOYMENT_ACCOUNT_PRIVATE_KEY)
 
-async function mintAddress(erc677token, address, nonce) {
+async function mintAddress(erc677token, address, nonce, rpc_url) {
   const mintData = await erc677token.methods
     .mint(address, '10000000000000000000')
     .encodeABI({ from: DEPLOYMENT_ACCOUNT_ADDRESS })
@@ -41,7 +41,7 @@ async function mintAddress(erc677token, address, nonce) {
     nonce: nonce,
     to: erc677token.options.address,
     privateKey: deploymentPrivateKey,
-    url: FOREIGN_RPC_URL
+    url: rpc_url
   })
 
   assert.strictEqual(Web3Utils.hexToNumber(txMint.status), 1, 'Transaction Failed')
@@ -49,13 +49,16 @@ async function mintAddress(erc677token, address, nonce) {
 
 async function deployErc677Token(chain) {
   let web3
+  let rpc_url
 
   chain = chain.toUpperCase()
 
   if (chain === 'HOME') {
     web3 = web3Home
+    rpc_url = HOME_RPC_URL
   } else if (chain === 'FOREIGN') {
     web3 = web3Foreign
+    rpc_url = FOREIGN_RPC_URL
   }
 
   let nonce = await web3.eth.getTransactionCount(DEPLOYMENT_ACCOUNT_ADDRESS)
@@ -76,11 +79,11 @@ async function deployErc677Token(chain) {
   if (shouldMint) {
     if (NODE_ENV === 'test' && USER_ADDRESS) {
       console.log(`[${chain}] minting 100 tokens to ${USER_ADDRESS} for test`)
-      await mintAddress(erc677token, USER_ADDRESS, nonce)
+      await mintAddress(erc677token, USER_ADDRESS, nonce, rpc_url)
       nonce++
     } else {
       console.log(`[${chain}] minting 100 tokens and transfer them to `, DEPLOYMENT_ACCOUNT_ADDRESS)
-      await mintAddress(erc677token, DEPLOYMENT_ACCOUNT_ADDRESS, nonce)
+      await mintAddress(erc677token, DEPLOYMENT_ACCOUNT_ADDRESS, nonce, rpc_url)
       nonce++
     }
   }

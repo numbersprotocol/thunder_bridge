@@ -83,7 +83,7 @@ switch (env.BRIDGE_MODE) {
   case 'ERC677_TO_ERC677':
     homeAbi = homeErc677Erc677Abi
     foreignAbi = foreignErc677Erc677Abi
-    id = 'erc-erc'
+    id = 'erc677-erc677'
     break
   default:
     if (process.env.NODE_ENV !== 'test') {
