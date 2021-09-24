@@ -8,7 +8,8 @@ const FOREIGN_ERC_TO_NATIVE_ABI = require('../abis/ForeignBridgeErcToNative.abi'
 const BRIDGE_MODES = {
   NATIVE_TO_ERC: 'NATIVE_TO_ERC',
   ERC_TO_ERC: 'ERC_TO_ERC',
-  ERC_TO_NATIVE: 'ERC_TO_NATIVE'
+  ERC_TO_NATIVE: 'ERC_TO_NATIVE',
+  ERC677_TO_ERC677: 'ERC677_TO_ERC677'
 }
 
 const ERC_TYPES = {
