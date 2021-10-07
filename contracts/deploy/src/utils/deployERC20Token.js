@@ -49,7 +49,7 @@ async function mintAddress(erc677token, address, nonce, rpc_url) {
 }
 
 
-async function deployErc677TokenInternal(chain, tokenAbi) {
+async function deployErc677TokenInternal(chain, tokenAbi, noMint) {
   let web3
   let rpc_url
 
@@ -76,7 +76,7 @@ async function deployErc677TokenInternal(chain, tokenAbi) {
   // only mint foreign token when bridge in, or mint home token when bridge out
   let shouldMint =
     env.BRIDGE_MODE !== 'ERC677_TO_ERC677' ||
-    (env.BRIDGE_MODE === 'ERC677_TO_ERC677' && chain == 'HOME')
+    (env.BRIDGE_MODE === 'ERC677_TO_ERC677' && chain == 'HOME') && !noMint
 
   if (shouldMint) {
     if (NODE_ENV === 'test' && USER_ADDRESS) {
@@ -97,14 +97,19 @@ async function deployErc677TokenInternal(chain, tokenAbi) {
 }
 
 async function deployErc677Token(chain) {
-  return deployErc677TokenInternal(chain, ERC677BridgeToken);
+  return deployErc677TokenInternal(chain, ERC677BridgeToken, false);
 }
 
 async function deployErc677MultiplBridgeToken(chain) {
-  return deployErc677TokenInternal(chain, ERC677MultiBridgeToken);
+  return deployErc677TokenInternal(chain, ERC677MultiBridgeToken, false);
+}
+
+async function deployErc677MultiplBridgeTokenNoMint(chain) {
+  return deployErc677TokenInternal(chain, ERC677MultiBridgeToken, true);
 }
 
 module.exports = {
   deployErc677Token,
-  deployErc677MultiplBridgeToken
+  deployErc677MultiplBridgeToken,
+  deployErc677MultiplBridgeTokenNoMint
 }
