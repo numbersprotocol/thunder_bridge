@@ -10,9 +10,10 @@ const EternalStorageProxy = require('../../../build/contracts/EternalStorageProx
 const BridgeValidators = require('../../../build/contracts/BridgeValidators.json')
 const ERC677InitializableToken = require('../../../build/contracts/ERC677InitializableToken.json')
 const ERC677BridgeToken = require('../../../build/contracts/ERC677BridgeToken.json')
+const ERC677MultiBridgeToken = require('../../../build/contracts/ERC677MultiBridgeToken.json')
 const TokenProxy = require('../../../build/contracts/TokenProxy.json')
 const { ZERO_ADDRESS } = require('../constants')
-const deployErc677Token = require('../utils/deployERC20Token')
+const {deployErc677MultiplBridgeToken} = require('../utils/deployERC20Token')
 
 const VALIDATORS = env.VALIDATORS.split(' ')
 
@@ -144,21 +145,21 @@ async function deployHome(homeTokenAddress) {
   let initializableToken
   let tokenAddress = homeTokenAddress
   if (env.BRIDGE_MODE === 'ERC677_TO_ERC677' && !tokenAddress) {
-    let ret = await deployErc677Token('HOME')
+    let ret = await deployErc677MultiplBridgeToken('HOME')
     tokenAddress = ret.erc677tokenAddress
     homeNonce = await web3Home.eth.getTransactionCount(DEPLOYMENT_ACCOUNT_ADDRESS)
-    let token = new web3Home.eth.Contract(ERC677BridgeToken.abi, tokenAddress)
-    const setBridgeContractData = await token.methods
-      .setBridgeContract(homeBridgeStorage.options.address)
+    let token = new web3Home.eth.Contract(ERC677MultiBridgeToken.abi, tokenAddress)
+    const addBridgeContractData = await token.methods
+      .addBridgeContract(homeBridgeStorage.options.address)
       .encodeABI({ from: DEPLOYMENT_ACCOUNT_ADDRESS })
-    const setBridgeContract = await sendRawTxHome({
-      data: setBridgeContractData,
+    const addBridgeContract = await sendRawTxHome({
+      data: addBridgeContractData,
       nonce: homeNonce,
       to: tokenAddress,
       privateKey: deploymentPrivateKey,
       url: HOME_RPC_URL
     })
-    assert.strictEqual(Web3Utils.hexToNumber(setBridgeContract.status), 1, 'Transaction Failed')
+    assert.strictEqual(Web3Utils.hexToNumber(addBridgeContract.status), 1, 'Transaction Failed')
     homeNonce++
   } else if (env.BRIDGE_MODE !== 'ERC_TO_NATIVE') {
     console.log('\n[Home] deploying initializable token')

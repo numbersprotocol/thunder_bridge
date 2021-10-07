@@ -2,7 +2,7 @@ const Web3Utils = require('web3-utils')
 
 const env = require('./src/loadEnv')
 const { deployErcToErc, deployErc677ToErc677 } = require('./deployErc')
-const deployErc677Token = require('./src/utils/deployERC20Token')
+const {deployErc677Token} = require('./src/utils/deployERC20Token')
 
 const { BRIDGE_MODE, ERC20_TOKEN_ADDRESS, HOME_ERC677_ADDRESS } = env
 

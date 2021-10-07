@@ -49,11 +49,6 @@ module.exports = {
       network_id: "*",
       gasPrice: 1000000000
     },
-    cli: {
-      host: "localhost",
-      port: 9745,
-      network_id: 5777
-    },
     /*
     kovan: {
       host: "localhost",

@@ -18,6 +18,7 @@ const {
 } = require('../web3')
 
 const ERC677BridgeToken = require('../../../build/contracts/ERC677BridgeToken.json')
+const ERC677MultiBridgeToken = require("../../../build/contracts/ERC677MultiBridgeToken.json")
 
 const {
   BRIDGE_MODE,
@@ -47,7 +48,8 @@ async function mintAddress(erc677token, address, nonce, rpc_url) {
   assert.strictEqual(Web3Utils.hexToNumber(txMint.status), 1, 'Transaction Failed')
 }
 
-async function deployErc677Token(chain) {
+
+async function deployErc677TokenInternal(chain, tokenAbi) {
   let web3
   let rpc_url
 
@@ -62,14 +64,14 @@ async function deployErc677Token(chain) {
   }
 
   let nonce = await web3.eth.getTransactionCount(DEPLOYMENT_ACCOUNT_ADDRESS)
-  console.log(`\n[${chain}] deploying ERC20 token`)
+  console.log(`\n[${chain}] deploying ERC677 token`)
   const erc677token = await deployContract(
-    ERC677BridgeToken,
+    tokenAbi,
     [BRIDGEABLE_TOKEN_NAME, BRIDGEABLE_TOKEN_SYMBOL, BRIDGEABLE_TOKEN_DECIMALS],
     { from: DEPLOYMENT_ACCOUNT_ADDRESS, network: chain.toLowerCase(), nonce: nonce }
   )
   nonce++
-  console.log(`[${chain}] ERC20 Token: `, erc677token.options.address)
+  console.log(`[${chain}] ERC677 Token: `, erc677token.options.address)
 
   // only mint foreign token when bridge in, or mint home token when bridge out
   let shouldMint =
@@ -94,4 +96,15 @@ async function deployErc677Token(chain) {
   }
 }
 
-module.exports = deployErc677Token
+async function deployErc677Token(chain) {
+  return deployErc677TokenInternal(chain, ERC677BridgeToken);
+}
+
+async function deployErc677MultiplBridgeToken(chain) {
+  return deployErc677TokenInternal(chain, ERC677MultiBridgeToken);
+}
+
+module.exports = {
+  deployErc677Token,
+  deployErc677MultiplBridgeToken
+}
