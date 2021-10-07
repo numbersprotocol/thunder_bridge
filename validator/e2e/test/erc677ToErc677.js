@@ -45,7 +45,6 @@ describe('erc677 to erc677', () => {
           console.error(e)
         })
       status = depositTx.status
-      console.log(depositTx.transactionHash, status)
     }
     // Send a trivial transaction to generate a new block since the watcher
     // is configured to wait 1 confirmation block

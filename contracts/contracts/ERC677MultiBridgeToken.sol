@@ -3,7 +3,7 @@ pragma solidity 0.4.24;
 import "./ERC677BridgeToken.sol";
 
 contract ERC677MultiBridgeToken is ERC677BridgeToken {
-    mapping(bytes32 => bool) internal boolStorage;
+    mapping(address => bool) internal validBridgeContract;
 
     constructor(
         string _name,
@@ -13,23 +13,19 @@ contract ERC677MultiBridgeToken is ERC677BridgeToken {
 
     function addBridgeContract(address _bridgeContract) onlyOwner public {
         require(_bridgeContract != address(0) && isContract(_bridgeContract));
-        boolStorage[keccak256(abi.encodePacked("bridgeContract", _bridgeContract))] = true;
+        validBridgeContract[_bridgeContract] = true;
     }
 
     function isBridgeContract(address _bridge) public view returns (bool) {
-        return boolStorage[keccak256(abi.encodePacked("bridgeContract", _bridge))];
+        return validBridgeContract[_bridge];
     }
 
     function transfer(address _to, uint256 _value) public returns (bool)
     {
         require(superTransfer(_to, _value), "failed superTransfer");
         fundReceiver(_to);
-        if (isContract(_to) && !contractFallback(_to, _value, new bytes(0))) {
-            if (isBridgeContract(_to)) {
-                revert("reverted here");
-            } else {
-                emit ContractFallbackCallFailed(msg.sender, _to, _value);
-            }
+        if (isBridgeContract(_to) && !contractFallback(_to, _value, new bytes(0))) {
+            revert("reverted here");
         }
         return true;
     }
