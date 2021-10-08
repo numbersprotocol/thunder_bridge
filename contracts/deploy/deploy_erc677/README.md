@@ -1,9 +1,11 @@
 # How to deploy ERC677
 
-1. npm install
-2. truffle compile
+enter thunder_bridge/contracts/deploy/deploy_erc677
+
+1. `npm install`
+2. `truffle compile`
 3. copy .env.example to ../.env
-4. fill right the value below in ../.env
+4. fill the right value below in ../.env
 
 ```env
 DEPLOYMENT_ACCOUNT_PRIVATE_KEY=
@@ -21,7 +23,7 @@ HOME_RPC_URL=
 ## Truffle
 
 if you're using ganache, just execute `truffle console --network test`, otherwise you need to create a .private-keys file
-and each line is a private of some account, like
+and each line is a private key of some address, like
 
 ```
 5309979b8a0efeec6db81d041e7afcdcf7d0171be80d757bb4afcaf100da9f0e
