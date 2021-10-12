@@ -1,37 +1,37 @@
 version: '2'
 services:
-    stress-home:
-      image: validator
-      stdin_open: true
-      network_mode: host
-      tty: true
-      environment:
-        - BRIDGE_MODE=ERC_TO_NATIVE
-        - HOME_RPC_URL=http://127.0.0.1:8541
-        - FOREIGN_RPC_URL=http://127.0.0.1:8542
-        - USER_ADDRESS=0x9039dD6D7189CE1F9cF8b098d18358e4e41B19BD
-        - USER_ADDRESS_PRIVATE_KEY=2c3b2a410d5153214e97c814a300f8e7beb31485d0843f5b28826bab1918a61f
-        - FOREIGN_CUSTOM_RECIPIENT=0x9039dD6D7189CE1F9cF8b098d18358e4e41B19BD
-        - HOME_MIN_AMOUNT_PER_TX=10
-        - HOME_TEST_TX_GAS_PRICE=1000000000
-        - FOREIGN_MIN_AMOUNT_PER_TX=10
-        - FOREIGN_TEST_TX_GAS_PRICE=1000000000
-        - FOREIGN_BLOCK_TIME=1
-        - HOME_BLOCK_TIME=1
-      volumes:
-        - ../scripts:/app/scripts
-        - ../src:/app/src
-        - ../data:/app/data
-      command: npm run stressHome 10
-      # command: bash
-    stress-foreign:
-      extends: stress-home
-      environment:
-        - USER_ADDRESS=0x9039dD6D7189CE1F9cF8b098d18358e4e41B19BD
-        - USER_ADDRESS_PRIVATE_KEY=2c3b2a410d5153214e97c814a300f8e7beb31485d0843f5b28826bab1918a61f
-        - HOME_CUSTOM_RECIPIENT=0x9039dD6D7189CE1F9cF8b098d18358e4e41B19BD
-      command: npm run stressForeign 10
-      # command: bash
-    monitor-balances:
-      extends: stress-home
-      command: node scripts/erc20_to_erc20/monitorBalances.js
+  stress-home:
+    image: validator
+    stdin_open: true
+    network_mode: host
+    tty: true
+    environment:
+      - BRIDGE_MODE=ERC_TO_NATIVE
+      - HOME_RPC_URL=http://127.0.0.1:8541
+      - FOREIGN_RPC_URL=http://127.0.0.1:8542
+      - USER_ADDRESS=0x9039dD6D7189CE1F9cF8b098d18358e4e41B19BD
+      - USER_ADDRESS_PRIVATE_KEY=2c3b2a410d5153214e97c814a300f8e7beb31485d0843f5b28826bab1918a61f
+      - FOREIGN_CUSTOM_RECIPIENT=0x9039dD6D7189CE1F9cF8b098d18358e4e41B19BD
+      - HOME_MIN_AMOUNT_PER_TX=1
+      - HOME_TEST_TX_GAS_PRICE=1000000000
+      - FOREIGN_MIN_AMOUNT_PER_TX=1
+      - FOREIGN_TEST_TX_GAS_PRICE=1000000000
+      - FOREIGN_BLOCK_TIME=1
+      - HOME_BLOCK_TIME=1
+    volumes:
+      - ../scripts:/app/scripts
+      - ../src:/app/src
+      - ../data:/app/data
+    command: npm run stressHome 10
+    # command: bash
+  stress-foreign:
+    extends: stress-home
+    environment:
+      - USER_ADDRESS=0x9039dD6D7189CE1F9cF8b098d18358e4e41B19BD
+      - USER_ADDRESS_PRIVATE_KEY=2c3b2a410d5153214e97c814a300f8e7beb31485d0843f5b28826bab1918a61f
+      - HOME_CUSTOM_RECIPIENT=0x9039dD6D7189CE1F9cF8b098d18358e4e41B19BD
+    command: npm run stressForeign 10
+    # command: bash
+  monitor-balances:
+    extends: stress-home
+    command: node scripts/erc20_to_erc20/monitorBalances.js

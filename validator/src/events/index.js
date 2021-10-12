@@ -5,21 +5,22 @@ const processCollectedSignaturesBuilder = require('./processCollectedSignatures'
 const processAffirmationRequestsBuilder = require('./processAffirmationRequests')
 const processTransfersBuilder = require('./processTransfers')
 
-
 async function processEvents(task, validator) {
   const events = [task.event]
 
-  var builder;
+  var builder
   switch (task.eventType) {
     case 'native-erc-signature-request':
     case 'erc-erc-signature-request':
     case 'erc-native-signature-request':
+    case 'erc677-erc677-signature-request':
       builder = processSignatureRequestsBuilder
       break
 
     case 'native-erc-collected-signatures':
     case 'erc-erc-collected-signatures':
     case 'erc-native-collected-signatures':
+    case 'erc677-erc677-collected-signatures':
       builder = processCollectedSignaturesBuilder
       break
 
@@ -29,6 +30,7 @@ async function processEvents(task, validator) {
 
     case 'erc-erc-affirmation-request':
     case 'erc-native-affirmation-request':
+    case 'erc677-erc677-affirmation-request':
       builder = processTransfersBuilder
       break
 
@@ -39,7 +41,6 @@ async function processEvents(task, validator) {
   return builder(config, validator)(events)
 }
 
-
 module.exports = {
-    processEvents
+  processEvents,
 }

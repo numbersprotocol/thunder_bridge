@@ -19,3 +19,6 @@ services:
   e2e-erc-to-native:
     extends: test-e2e
     command: npx mocha test/ercToNative.js
+  e2e-erc677-to-erc677:
+    extends: test-e2e
+    command: npx mocha test/erc677ToErc677.js

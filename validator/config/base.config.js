@@ -11,50 +11,52 @@ const foreignErcErcAbi = require('../abis/ForeignBridgeErcToErc.abi.json')
 const homeErcNativeAbi = require('../abis/HomeBridgeErcToNative.abi.json')
 const foreignErcNativeAbi = require('../abis/ForeignBridgeErcToNative.abi.json')
 
+const homeErc677Erc677Abi = require('../abis/HomeBridgeErc677ToErc677WithFee.json').abi
+const foreignErc677Erc677Abi = require('../abis/ForeignBridgeErc677ToErc677.json').abi
+
 let homeAbi
 let foreignAbi
 let id
 
-
-const validateAddress = envalid.makeValidator(address => {
+const validateAddress = envalid.makeValidator((address) => {
   if (isAddress(address)) {
     return address
   }
   throw new Error(`Invalid address: ${address}`)
 })
 
-const bigNumValidator = envalid.makeValidator(x => x? toBN(x): toBN(0))
+const bigNumValidator = envalid.makeValidator((x) => (x ? toBN(x) : toBN(0)))
 
 let validations = {
-  ALLOW_HTTP: envalid.str({default: 'no'}),
-  BRIDGE_MODE: envalid.str({choices: ['NATIVE_TO_ERC', 'ERC_TO_ERC', 'ERC_TO_NATIVE']}),
+  ALLOW_HTTP: envalid.str({ default: 'no' }),
+  BRIDGE_MODE: envalid.str({ choices: ['NATIVE_TO_ERC', 'ERC_TO_ERC', 'ERC_TO_NATIVE', 'ERC677_TO_ERC677'] }),
   ERC20_TOKEN_ADDRESS: validateAddress(),
-  EXTRA_GAS_PERCENTAGE: envalid.num({default: 1}),
-  FOREIGN_BLOCK_CONFIRMATION: envalid.num( {default: 6}),
+  EXTRA_GAS_PERCENTAGE: envalid.num({ default: 1 }),
+  FOREIGN_BLOCK_CONFIRMATION: envalid.num({ default: 6 }),
   FOREIGN_BLOCK_TIME: envalid.num({ default: 1000 }),
   FOREIGN_BRIDGE_ADDRESS: validateAddress(),
-  FOREIGN_POLLING_INTERVAL: envalid.num({default: 2000}),
+  FOREIGN_POLLING_INTERVAL: envalid.num({ default: 2000 }),
   FOREIGN_START_BLOCK: bigNumValidator(),
   FOREIGN_VALIDATOR_REQUIRED_BALANCE: envalid.num({ default: 0.1 }),
   FOREIGN_GAS_PRICE_SPEED_TYPE: envalid.str({ default: 'standard' }),
   FOREIGN_GAS_PRICE_UPDATE_INTERVAL: envalid.num({ default: 60 * 1000 }),
-  FOREIGN_MAX_GAS_PRICE_LIMIT: envalid.num({default: 500}),
+  FOREIGN_MAX_GAS_PRICE_LIMIT: envalid.num({ default: 500 }),
   GAS_PRICE_BUMP_INTERVAL: envalid.num({ default: 60 * 1000 }),
-  HOME_BLOCK_CONFIRMATION: envalid.num({default: 6}),
+  HOME_BLOCK_CONFIRMATION: envalid.num({ default: 6 }),
   HOME_BLOCK_TIME: envalid.num({ default: 1000 }),
   HOME_BRIDGE_ADDRESS: validateAddress(),
-  HOME_POLLING_INTERVAL: envalid.num({default: 2000}),
+  HOME_POLLING_INTERVAL: envalid.num({ default: 2000 }),
   HOME_START_BLOCK: bigNumValidator(),
   HOME_VALIDATOR_REQUIRED_BALANCE: envalid.num({ default: 0.1 }),
   HOME_GAS_PRICE_SPEED_TYPE: envalid.str({ default: 'standard' }),
   HOME_GAS_PRICE_UPDATE_INTERVAL: envalid.num({ default: 60 * 1000 }),
-  HOME_MAX_GAS_PRICE_LIMIT: envalid.num({default: 5}),
-  LOG_LEVEL: envalid.str({default: 'debug'}),
-  MAX_PROCESSING_TIME: envalid.num({default: null}),
+  HOME_MAX_GAS_PRICE_LIMIT: envalid.num({ default: 5 }),
+  LOG_LEVEL: envalid.str({ default: 'debug' }),
+  MAX_PROCESSING_TIME: envalid.num({ default: null }),
   MAX_WAIT_RECEIPT_BLOCK: envalid.num(),
-  NODE_ENV: envalid.str({default: 'test'}),
-  QUEUE_RETRY_DELAY: envalid.num({default: 2000}),
-  QUEUE_RETRY_LIMIT: envalid.num({default: 5}),
+  NODE_ENV: envalid.str({ default: 'test' }),
+  QUEUE_RETRY_DELAY: envalid.num({ default: 2000 }),
+  QUEUE_RETRY_LIMIT: envalid.num({ default: 5 }),
   QUEUE_URL: envalid.str(),
   REDIS_LOCK_TTL: envalid.num(),
 }
@@ -78,6 +80,11 @@ switch (env.BRIDGE_MODE) {
     foreignAbi = foreignErcNativeAbi
     id = 'erc-native'
     break
+  case 'ERC677_TO_ERC677':
+    homeAbi = homeErc677Erc677Abi
+    foreignAbi = foreignErc677Erc677Abi
+    id = 'erc677-erc677'
+    break
   default:
     if (process.env.NODE_ENV !== 'test') {
       throw new Error(`Bridge Mode: ${process.env.BRIDGE_MODE} not supported.`)
@@ -92,8 +99,7 @@ let maxProcessingTime = null
 if (String(env.MAX_PROCESSING_TIME) === '0') {
   maxProcessingTime = 0
 } else if (!env.MAX_PROCESSING_TIME) {
-  maxProcessingTime =
-    4 * Math.max(env.HOME_POLLING_INTERVAL, env.FOREIGN_POLLING_INTERVAL)
+  maxProcessingTime = 4 * Math.max(env.HOME_POLLING_INTERVAL, env.FOREIGN_POLLING_INTERVAL)
 } else {
   maxProcessingTime = Number(env.MAX_PROCESSING_TIME)
 }
@@ -104,7 +110,7 @@ const bridgeConfig = {
   foreignBridgeAddress: env.FOREIGN_BRIDGE_ADDRESS,
   foreignBridgeAbi: foreignAbi,
   eventFilter: {},
-  maxProcessingTime
+  maxProcessingTime,
 }
 
 const homeConfig = {
@@ -114,7 +120,7 @@ const homeConfig = {
   bridgeAbi: homeAbi,
   pollingInterval: env.HOME_POLLING_INTERVAL,
   startBlock: env.HOME_START_BLOCK,
-  web3: web3Home
+  web3: web3Home,
 }
 
 const foreignConfig = {
@@ -124,7 +130,7 @@ const foreignConfig = {
   bridgeAbi: foreignAbi,
   pollingInterval: env.FOREIGN_POLLING_INTERVAL,
   startBlock: env.FOREIGN_START_BLOCK,
-  web3: web3Foreign
+  web3: web3Foreign,
 }
 
 module.exports = {
@@ -132,5 +138,5 @@ module.exports = {
   homeConfig,
   foreignConfig,
   id,
-  env
+  env,
 }

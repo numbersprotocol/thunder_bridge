@@ -1,5 +1,7 @@
 const POA20 = artifacts.require("ERC677BridgeToken.sol");
 const ERC677ReceiverTest = artifacts.require("ERC677ReceiverTest.sol")
+const ERC677MultiBridgeToken = artifacts.require("ERC677MultiBridgeToken.sol")
+const AlwaysFail = artifacts.require("AlwaysFail.sol")
 
 const { expect } = require('chai')
 const { ERROR_MSG, ERROR_MSG_OPCODE, ZERO_ADDRESS, BN } = require('./setup')
@@ -20,6 +22,66 @@ const ZERO = new BN(0)
 
 const ERC677InitialToken  = artifacts.require("ERC677InitializableToken.sol");
 const TokenProxy = artifacts.require("TokenProxy.sol");
+
+contract('ERC677MultiBridgeToken', async (accounts) => {
+  let token;
+  let owner = accounts[0];
+  const user = accounts[1];
+  beforeEach(async () => {
+    token = await ERC677MultiBridgeToken.new('ERC677', 'MBT', 18);
+  });
+  it('cannot add zero bridge contract', async () => {
+    await token.addBridgeContract(ZERO_ADDRESS).should.be.rejectedWith(ERROR_MSG);
+  });
+
+  it('can add bridge contract', async () => {
+    let bridge = await HomeErcToErcBridge.new();
+    await token.addBridgeContract(bridge.address).should.be.fulfilled;
+  })
+
+  it('can check if is bridge contract', async () => {
+    let bridge = await HomeErcToErcBridge.new();
+    await token.addBridgeContract(bridge.address);
+
+    expect(await token.isBridgeContract(bridge.address)).to.be.equal(true);
+  })
+
+  it('can add&check multiple bridge contract', async () => {
+    let bridge = await HomeErcToErcBridge.new();
+    let bridge2 = await HomeErcToErcBridge.new();
+    await token.addBridgeContract(bridge.address);
+    await token.addBridgeContract(bridge2.address).should.be.fulfilled;
+
+    expect(await token.isBridgeContract(bridge.address)).to.be.equal(true);
+    expect(await token.isBridgeContract(bridge2.address)).to.be.equal(true);
+    expect(await token.isBridgeContract('0xaaB52d66283F7A1D5978bcFcB55721ACB467384b')).to.be.equal(false);
+  })
+
+  it('should revert here when transfer failed', async () => {
+    let bridge = await AlwaysFail.new();
+
+    token.mint(owner, ether('10'));
+    await token.addBridgeContract(bridge.address);
+
+    await token.transfer(bridge.address, ether('0.1')).should.be.rejectedWith(ERROR_MSG);
+  });
+
+  it('should not revert due to unknown bridge', async () => {
+    let bridge = await AlwaysFail.new();
+
+    token.mint(owner, ether('10'));
+    await token.transfer(bridge.address, ether('0.1')).should.be.fulfilled;
+  });
+
+  it('cannot mint by non onwer', async () => {
+    await token.mint(owner, ether('10'), {from: user}).should.be.rejectedWith(ERROR_MSG);
+  })
+
+  it('can burn users own token', async () => {
+    await token.mint(user, ether('1'));
+    await token.burn(ether('1'), {from: user}).should.be.fulfilled;
+  })
+});
 
 contract('ERC677BridgeToken', async (accounts) => {
   let token

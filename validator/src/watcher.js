@@ -42,7 +42,7 @@ async function initialize() {
     await getLastProcessedBlock()
     connectWatcherToQueue({
       queueName: config.queue,
-      cb: runMain
+      cb: runMain,
     })
   } catch (e) {
     logger.error(e)
@@ -54,10 +54,14 @@ async function runMain({ sendToQueue }) {
   try {
     if (connection.isConnected() && redis.status === 'ready') {
       if (config.maxProcessingTime) {
-        await watchdog(() => main({ sendToQueue }), config.maxProcessingTime, () => {
-          logger.fatal('Max processing time reached')
-          process.exit(EXIT_CODES.MAX_TIME_REACHED)
-        })
+        await watchdog(
+          () => main({ sendToQueue }),
+          config.maxProcessingTime,
+          () => {
+            logger.fatal('Max processing time reached')
+            process.exit(EXIT_CODES.MAX_TIME_REACHED)
+          },
+        )
       } else {
         await main({ sendToQueue })
       }
@@ -73,10 +77,7 @@ async function runMain({ sendToQueue }) {
 
 async function getLastProcessedBlock() {
   const result = await redis.get(lastBlockRedisKey)
-  logger.debug(
-    { fromRedis: result, fromConfig: lastProcessedBlock.toString() },
-    'Last Processed block obtained'
-  )
+  logger.debug({ fromRedis: result, fromConfig: lastProcessedBlock.toString() }, 'Last Processed block obtained')
   lastProcessedBlock = result ? toBN(result) : lastProcessedBlock
 }
 
@@ -90,15 +91,18 @@ function processEvents(events) {
     case 'native-erc-signature-request':
     case 'erc-erc-signature-request':
     case 'erc-native-signature-request':
+    case 'erc677-erc677-signature-request':
       return processSignatureRequests(events)
     case 'native-erc-collected-signatures':
     case 'erc-erc-collected-signatures':
     case 'erc-native-collected-signatures':
+    case 'erc677-erc677-collected-signatures':
       return processCollectedSignatures(events)
     case 'native-erc-affirmation-request':
       return processAffirmationRequests(events)
     case 'erc-erc-affirmation-request':
     case 'erc-native-affirmation-request':
+    case 'erc677-erc677-affirmation-request':
       return processTransfers(events)
     default:
       return []
@@ -110,7 +114,7 @@ async function getLastBlockToProcess() {
   const requiredBlockConfirmationsPromise = getRequiredBlockConfirmations(bridgeContract).then(toBN)
   const [lastBlockNumber, requiredBlockConfirmations] = await Promise.all([
     lastBlockNumberPromise,
-    requiredBlockConfirmationsPromise
+    requiredBlockConfirmationsPromise,
   ])
 
   return lastBlockNumber.sub(requiredBlockConfirmations)
@@ -134,7 +138,7 @@ async function main({ sendToQueue }) {
       eventName: config.event,
       fromBlock,
       toBlock,
-      filter: config.eventFilter
+      filter: config.eventFilter,
     })
     logger.info(`Found ${events.length} ${config.event} events`)
 
@@ -147,10 +151,7 @@ async function main({ sendToQueue }) {
       }
     }
 
-    logger.debug(
-      { lastProcessedBlock: lastBlockToProcess.toString() },
-      'Updating last processed block'
-    )
+    logger.debug({ lastProcessedBlock: lastBlockToProcess.toString() }, 'Updating last processed block')
     await updateLastProcessedBlock(lastBlockToProcess)
   } catch (e) {
     logger.error(e)

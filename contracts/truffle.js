@@ -1,30 +1,34 @@
-const HDWalletProvider = require('truffle-hdwallet-provider');
-const fs = require('fs');
-const JSON5 = require('json5');
+const HDWalletProvider = require("truffle-hdwallet-provider");
+const fs = require("fs");
+const JSON5 = require("json5");
 
-let infuraProjectId = null, infuraProjectSecret = null;
+let infuraProjectId = null,
+  infuraProjectSecret = null;
 try {
-  const localConfStr = fs.readFileSync('local.jsonc', { encoding: 'utf8' });
+  const localConfStr = fs.readFileSync("local.jsonc", { encoding: "utf8" });
   const localConf = JSON5.parse(localConfStr);
-  let t = localConf['infura_project_id'];
+  let t = localConf["infura_project_id"];
   if (t) {
     infuraProjectId = t;
   }
-  t = localConf['infura_project_secret'];
+  t = localConf["infura_project_secret"];
   if (t) {
     infuraProjectSecret = t;
   }
 } catch (err) {
-  if (err.code !== 'ENOENT') {
+  if (err.code !== "ENOENT") {
     throw err;
   }
 }
 
 let privateKeys;
 try {
-  privateKeys = fs.readFileSync('.private-keys', {encoding: 'ascii'}).split('\n').filter(x => x.length > 0);
+  privateKeys = fs
+    .readFileSync(".private-keys", { encoding: "ascii" })
+    .split("\n")
+    .filter(x => x.length > 0);
 } catch (err) {
-  if (err.code === 'ENOENT') {
+  if (err.code === "ENOENT") {
     privateKeys = null;
   } else {
     throw err;
@@ -45,7 +49,7 @@ module.exports = {
       network_id: "*",
       gasPrice: 1000000000
     },
-	  /*
+    /*
     kovan: {
       host: "localhost",
       port: "8591",
@@ -56,17 +60,21 @@ module.exports = {
     eth: {
       provider: () => {
         if (privateKeys === null) {
-          throw (new Error('Create a .private-keys file'));
+          throw new Error("Create a .private-keys file");
         }
         if (infuraProjectId === null) {
-          throw (new Error('Set "infura_project_id" in local.jsonc'));
+          throw new Error('Set "infura_project_id" in local.jsonc');
         }
         if (infuraProjectSecret === null) {
-          throw (new Error('Set "infura_project_secret" in local.jsonc'));
+          throw new Error('Set "infura_project_secret" in local.jsonc');
         }
         // FIXME: infuraProjectSecret not used yet
-        return new HDWalletProvider(privateKeys, `https://mainnet.infura.io/v3/${infuraProjectId}`, 0 /*address_index*/,
-          privateKeys.length/*num_address*/);
+        return new HDWalletProvider(
+          privateKeys,
+          `https://mainnet.infura.io/v3/${infuraProjectId}`,
+          0 /*address_index*/,
+          privateKeys.length /*num_address*/
+        );
       },
       network_id: 1,
       gasPrice: 1000000000
@@ -74,17 +82,21 @@ module.exports = {
     kovan: {
       provider: () => {
         if (privateKeys === null) {
-          throw (new Error('Create a .private-keys file'));
+          throw new Error("Create a .private-keys file");
         }
         if (infuraProjectId === null) {
-          throw (new Error('Set "infura_project_id" in local.jsonc'));
+          throw new Error('Set "infura_project_id" in local.jsonc');
         }
         if (infuraProjectSecret === null) {
-          throw (new Error('Set "infura_project_secret" in local.jsonc'));
+          throw new Error('Set "infura_project_secret" in local.jsonc');
         }
         // FIXME: infuraProjectSecret not used yet
-        return new HDWalletProvider(privateKeys, `https://kovan.infura.io/v3/${infuraProjectId}`, 0 /*address_index*/,
-          privateKeys.length/*num_address*/);
+        return new HDWalletProvider(
+          privateKeys,
+          `https://kovan.infura.io/v3/${infuraProjectId}`,
+          0 /*address_index*/,
+          privateKeys.length /*num_address*/
+        );
       },
       network_id: 42,
       gasPrice: 1000000000
@@ -105,36 +117,60 @@ module.exports = {
       gasPrice: 1000000000
     },
     coverage: {
-      host: 'localhost',
-      network_id: '*', // eslint-disable-line camelcase
+      host: "localhost",
+      network_id: "*", // eslint-disable-line camelcase
       port: 8555,
       gas: 0xfffffffffff,
-      gasPrice: 0x01,
+      gasPrice: 0x01
     },
     contract_test: {
-      host: 'localhost',
+      host: "localhost",
       port: 8545,
-      network_id: '*', // eslint-disable-line camelcase
+      network_id: "*", // eslint-disable-line camelcase
       gasPrice: 1000000000
     },
-    'thunder-mainnet': {
+    "thunder-mainnet": {
       provider: () => {
         if (privateKeys === null) {
-          throw (new Error('Create a .private-keys file'));
+          throw new Error("Create a .private-keys file");
         }
-        return new HDWalletProvider(privateKeys, 'https://mainnet-rpc.thundercore.com', 0 /*address_index*/, privateKeys.length/*num_addresses*/);
+        return new HDWalletProvider(
+          privateKeys,
+          "https://mainnet-rpc.thundercore.com",
+          0 /*address_index*/,
+          privateKeys.length /*num_addresses*/
+        );
       },
-      network_id: '108',
+      network_id: "108"
     },
-    'thunder-venus': {
+    "thunder-venus": {
       provider: () => {
         if (privateKeys === null) {
-          throw (new Error('Create a .private-keys file'));
+          throw new Error("Create a .private-keys file");
         }
-        return new HDWalletProvider(privateKeys, 'https://venus-rpc.thundercore.com', 0 /*address_index*/, privateKeys.length/*num_addresses*/);
+        return new HDWalletProvider(
+          privateKeys,
+          "https://venus-rpc.thundercore.com",
+          0 /*address_index*/,
+          privateKeys.length /*num_addresses*/
+        );
       },
-      network_id: '18',
+      network_id: "18"
     },
+    "thunder-testnet": {
+      provider: () => {
+          if (privateKeys === null) {
+            throw new Error("Create a .private-keys file");
+          }
+          return new HDWalletProvider(
+            privateKeys,
+            "https://testnet-rpc.thundercore.com",
+            0 /*address_index*/,
+            privateKeys.length /*num_addresses*/
+          );
+        },
+        network_id: "18"
+      }
   },
   compilers: {
     solc: {
@@ -143,15 +179,15 @@ module.exports = {
         optimizer: {
           enabled: true,
           runs: 200
-        },
+        }
       },
-      evmVersion: "byzantium",
-    },
+      evmVersion: "byzantium"
+    }
   },
   mocha: {
-    reporter: 'eth-gas-reporter',
-    reporterOptions : {
-      currency: 'USD',
+    reporter: "eth-gas-reporter",
+    reporterOptions: {
+      currency: "USD",
       gasPrice: 1
     }
   }

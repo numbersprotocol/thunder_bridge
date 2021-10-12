@@ -40,6 +40,8 @@ deploy-stress-%: build-deployer
 	cd $(E2E_DIR) && docker-compose -f docker-compose-infra.yaml up -d --build
 	docker run --rm --network=host \
 		-e BRIDGE_MODE=${BRIDGE_MODE} \
+		-e NODE_ENV="test" \
+		-e USER_ADDRESS="0x9039dD6D7189CE1F9cF8b098d18358e4e41B19BD" \
 		-v $(PWD)/contracts/deploy/envs/stress.env:/contracts/deploy/.env \
 		-v $(PWD)/validator/data:/contracts/deploy/data \
 		thunder_bridge_deployer
@@ -98,7 +100,7 @@ crash: deploy-stress
 	$(MAKE) run-all
 	cd $(VALIDATOR_DIR) && python scripts/crash-test.py | tee crash.log
 
-test-e2e: test-e2e-erc-to-native test-e2e-native-to-erc test-e2e-erc-to-erc
+test-e2e: test-e2e-erc-to-native test-e2e-native-to-erc test-e2e-erc-to-erc test-e2e-erc677-to-erc677
 
 test-truffle: test-truffle-native-to-erc test-truffle-erc-to-erc
 

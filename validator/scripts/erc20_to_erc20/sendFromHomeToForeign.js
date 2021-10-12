@@ -7,7 +7,7 @@ const { sendTx, sendRawTx } = require('../../src/tx/sendTx')
 const { isValidAmount } = require('../utils/utils')
 const { checkRelayedMessage, sleep, web3Home, rootLogger } = require('./utils')
 const Sentry = require('@sentry/node')
-const logger = rootLogger.child({ module: 'home->foreign'})
+const logger = rootLogger.child({ module: 'home->foreign' })
 
 const {
   USER_ADDRESS,
@@ -64,7 +64,8 @@ async function sendFromHomeToForeign(numberToSend) {
       logger.info(`Balance of ${USER_ADDRESS}: ${balance}`)
       let gasLimit = await erc677.methods
         .transferAndCall(HOME_BRIDGE_ADDRESS, transferValue, '0x')
-        .estimateGas({ from: USER_ADDRESS, value: transferValue })
+        .estimateGas({ from: USER_ADDRESS })
+
       gasLimit *= 2
 
       logger.info(`user: ${USER_ADDRESS}, gasLimit: ${gasLimit}`)
@@ -77,7 +78,7 @@ async function sendFromHomeToForeign(numberToSend) {
       }
       let value = web3Home.utils.toWei('0')
       if (BRIDGE_MODE === 'ERC_TO_NATIVE') {
-        value =  transferValue
+        value = transferValue
       }
       const tx = {
         chain: 'home',
@@ -89,7 +90,7 @@ async function sendFromHomeToForeign(numberToSend) {
         gasLimit,
         to: BRIDGEABLE_TOKEN_ADDRESS,
         web3: web3Home,
-        chainId: homeChainId
+        chainId: homeChainId,
       }
       const txHash = await sendTx(tx)
       if (txHash !== undefined) {
@@ -109,9 +110,9 @@ async function sendFromHomeToForeign(numberToSend) {
     logger.info(e)
   }
 
-  let receipt;
+  let receipt
   let idx = 0
-  while(!receipt && idx < numberToSend * HOME_BLOCK_TIME) {
+  while (!receipt && idx < numberToSend * HOME_BLOCK_TIME) {
     await sleep(1000)
     const c = toCheck[toCheck.length - 1]
     receipt = await web3Home.eth.getTransactionReceipt(c.transactionHash)
@@ -125,19 +126,23 @@ async function sendFromHomeToForeign(numberToSend) {
   const batch = new web3Home.BatchRequest()
   for (let i = 0; i < toCheck.length; i++) {
     const c = toCheck[i]
-    promises.push(new Promise((resolve, reject) =>{
-      batch.add(web3Home.eth.getTransactionReceipt.request(c.transactionHash, (err, receipt) =>{
-        if (err) {
-          reject(err)
-        } else {
-          if (receipt && receipt.status) {
-            expect[c.transactionHash] = false
-            numToCheck += 1
-          }
-          resolve(receipt)
-        }
-      }))
-    }))
+    promises.push(
+      new Promise((resolve, reject) => {
+        batch.add(
+          web3Home.eth.getTransactionReceipt.request(c.transactionHash, (err, receipt) => {
+            if (err) {
+              reject(err)
+            } else {
+              if (receipt && receipt.status) {
+                expect[c.transactionHash] = false
+                numToCheck += 1
+              }
+              resolve(receipt)
+            }
+          }),
+        )
+      }),
+    )
   }
 
   batch.execute()
@@ -158,15 +163,15 @@ async function sendFromHomeToForeign(numberToSend) {
     logger.info(`done=${done}, total=${numToCheck}`)
 
     if (retries > RETRY_LIMIT) {
-      logger.info("remaining transactions:")
+      logger.info('remaining transactions:')
       for (let i = 0; i < toCheck.length; i++) {
-        const c = toCheck[i];
+        const c = toCheck[i]
         if (expect[c.transactionHash] === false) {
           Sentry.addBreadcrumb({
             category: 'stressTest',
             message: 'failed transactions',
             data: c.transactionHash,
-            level: Sentry.Severity.Debug
+            level: Sentry.Severity.Debug,
           })
           logger.info(c)
         }
@@ -177,10 +182,10 @@ async function sendFromHomeToForeign(numberToSend) {
   }
   SENT += numToCheck
   SUCCESS += done
-  logger.info({SENT, SUCCESS}, 'run sendFromHomeToForeign finished.')
-  return {done, numToCheck}
+  logger.info({ SENT, SUCCESS }, 'run sendFromHomeToForeign finished.')
+  return { done, numToCheck }
 }
 
 module.exports = {
-  sendFromHomeToForeign
+  sendFromHomeToForeign,
 }
