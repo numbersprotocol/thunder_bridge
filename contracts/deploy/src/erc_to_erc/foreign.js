@@ -282,6 +282,23 @@ async function deployForeign(foreignTokenAddress) {
       .encodeABI({
         from: DEPLOYMENT_ACCOUNT_ADDRESS
       })
+  } else if (BRIDGE_MODE === 'ERC677_TO_ERC677') {
+    initializeFBridgeData = await foreignBridgeImplementation.methods
+      .initialize(
+        storageValidatorsForeign.options.address,
+        initializableToken.options.address,
+        FOREIGN_REQUIRED_BLOCK_CONFIRMATIONS,
+        FOREIGN_GAS_PRICE,
+        FOREIGN_MAX_AMOUNT_PER_TX,
+        HOME_DAILY_LIMIT,
+        HOME_MAX_AMOUNT_PER_TX,
+        FOREIGN_BRIDGE_OWNER,
+        FOREIGN_FEE_PERCENT,
+        FOREIGN_FALLBACK_RECIPIENT
+      )
+      .encodeABI({
+        from: DEPLOYMENT_ACCOUNT_ADDRESS
+      })
   } else {
     // ERC_TO_NATIVE and ERC677_TO_ERC677
     initializeFBridgeData = await foreignBridgeImplementation.methods
