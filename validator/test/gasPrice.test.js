@@ -38,9 +38,9 @@ describe('gasPrice', () => {
     it('test oracle return zero gas price', async () => {
       // given
       const oracleFnMock = () => Promise.resolve({
-        standard: 0,
-        fast: 10,
-        instant: 20,
+        slow: 0,
+        average: 10,
+        fast: 20,
       })
       const bridgeContractMock = {
         methods: {
@@ -57,15 +57,15 @@ describe('gasPrice', () => {
       })
 
       // then
-      expect(gasPrice).to.deep.equal({ standard: '5', fast: '10', instant: '20' })
+      expect(gasPrice).to.deep.equal({ slow: '5', average: '10', fast: '20' })
     })
 
     it('test oracle return all zero gas price', async () => {
       // given
       const oracleFnMock = () => Promise.resolve({
-        standard: 0,
+        slow: 0,
+        average: 0,
         fast: 0,
-        instant: 0,
       })
       const bridgeContractMock = {
         methods: {
@@ -82,7 +82,7 @@ describe('gasPrice', () => {
       })
 
       // then
-      expect(gasPrice).to.deep.equal({ standard: '5', fast: '5', instant: '5' })
+      expect(gasPrice).to.deep.equal({ slow: '5', average: '5', fast: '5' })
     })
 
     it('should fetch the gas price from the contract if the oracle fails', async () => {
@@ -103,7 +103,7 @@ describe('gasPrice', () => {
       })
 
       // then
-      expect(gasPrice).to.deep.equal({ standard: '2', fast: '2', instant: '2' })
+      expect(gasPrice).to.deep.equal({ slow: '2', average: '2', fast: '2' })
     })
     it('should return null if both the oracle and the contract fail', async () => {
       // given
@@ -127,7 +127,7 @@ describe('gasPrice', () => {
     })
     it('should return max if both the oracle and the contract success', async () => {
       // given
-      const oracleFnMock = () => Promise.resolve({ standard: '1', fast: '3', instant: '5' })
+      const oracleFnMock = () => Promise.resolve({ slow: '1', average: '3', fast: '5' })
       const bridgeContractMock = {
         methods: {
           gasPrice: sinon.stub().returns({
@@ -143,12 +143,12 @@ describe('gasPrice', () => {
       })
 
       // then
-      expect(gasPrice).to.deep.equal({ standard: '2', fast: '3', instant: '5' })
+      expect(gasPrice).to.deep.equal({ slow: '2', average: '3', fast: '5' })
     })
 
     it('should return fixed value if both the oracle and the contract success plus fixed is flaged', async () => {
       // given
-      const oracleFnMock = () => Promise.resolve({ standard: '1', fast: '3', instant: '5', fixed: '1000' })
+      const oracleFnMock = () => Promise.resolve({ slow: '1', average: '3', fast: '5', fixed: '1000' })
       const bridgeContractMock = {
         methods: {
           gasPrice: sinon.stub().returns({
@@ -164,7 +164,7 @@ describe('gasPrice', () => {
       })
 
       // then
-      expect(gasPrice).to.deep.equal({ standard: '2', fast: '3', instant: '5', fixed: '1000' })
+      expect(gasPrice).to.deep.equal({ slow: '2', average: '3', fast: '5', fixed: '1000' })
     })
   })
   describe('get price', () => {
@@ -175,22 +175,22 @@ describe('gasPrice', () => {
       process.env.GET_PRICE_TEST = 'test'
       config.maxGasPriceLimit = 300
       // this function only works when env.GET_PRICE_TEST is set to 'test'
-      const standard = toGWei(1)
-      const fast = toGWei(3)
-      const instant = toGWei(7)
+      const slow = toGWei(1)
+      const average = toGWei(3)
+      const fast = toGWei(7)
       const max = toGWei(300)
 
       setTestCachedGasPrice({
-        standard: standard,
+        slow: slow,
+        average: average,
         fast: fast,
-        instant: instant,
       })
 
       const now = Math.floor(Date.now())
 
-      expect(getPrice(now)).to.equal(standard, 'should use standard speed type')
-      expect(getPrice(now - 70 * 1000)).to.equal(fast, 'should use fast speed type')
-      expect(getPrice(now - 130 * 1000)).to.equal(instant, 'should use instant speed type')
+      expect(getPrice(now)).to.equal(slow, 'should use slow speed type')
+      expect(getPrice(now - 70 * 1000)).to.equal(average, 'should use average speed type')
+      expect(getPrice(now - 130 * 1000)).to.equal(fast, 'should use fast speed type')
       expect(getPrice(now - 190 * 1000)).to.equal(toGWei(7+(7-3)*1))
       expect(getPrice(now - 250 * 1000)).to.equal(toGWei(7+(7-3)*2))
       // The maximum gas price will be GAS_PRICE_BOUNDARIES.MAX after a long time
@@ -204,22 +204,22 @@ describe('gasPrice', () => {
       process.env.GET_PRICE_TEST = 'test'
       config.maxGasPriceLimit = 250
       // this function only works when env.GET_PRICE_TEST is set to 'test'
-      const standard = toGWei(1)
-      const fast = toGWei(3)
-      const instant = toGWei(7)
+      const slow = toGWei(1)
+      const average = toGWei(3)
+      const fast = toGWei(7)
       const max = toGWei(250)
       setTestCachedGasPrice({
-        standard: standard,
+        slow: slow,
+        average: average,
         fast: fast,
-        instant: instant,
       })
 
-      // Set speedType to fast
-      config.speedType = 'fast'
+      // Set speedType to average
+      config.speedType = 'average'
       const now = Math.floor(Date.now())
 
-      expect(getPrice(now)).to.equal(fast, 'should use fast speed type')
-      expect(getPrice(now - 70 * 1000)).to.equal(instant, 'should use instant speed type')
+      expect(getPrice(now)).to.equal(average, 'should use average speed type')
+      expect(getPrice(now - 70 * 1000)).to.equal(fast, 'should use fast speed type')
       expect(getPrice(now - 130 * 1000)).to.equal(toGWei(7+(7-3)*1))
       expect(getPrice(now - 190 * 1000)).to.equal(toGWei(7+(7-3)*2))
       expect(getPrice(now - 250 * 1000)).to.equal(toGWei(7+(7-3)*3))
@@ -234,22 +234,22 @@ describe('gasPrice', () => {
       process.env.GET_PRICE_TEST = 'test'
       config.maxGasPriceLimit = 500
       // this function only works when env.GET_PRICE_TEST is set to 'test'
-      const standard = toGWei(1)
-      const fast = toGWei(3)
-      const instant = toGWei(7)
+      const slow = toGWei(1)
+      const average = toGWei(3)
+      const fast = toGWei(7)
       const max = toGWei(500)
       setTestCachedGasPrice({
-        standard: standard,
+        slow: slow,
+        average: average,
         fast: fast,
-        instant: instant,
       })
 
-      // Set speedType to instant
-      config.speedType = 'instant'
+      // Set speedType to fast
+      config.speedType = 'fast'
       process.env.GAS_PRICE_BUMP_INTERVAL = 30 * 1000
       const now = Math.floor(Date.now())
 
-      expect(getPrice(now)).to.equal(instant, 'should use instant speed type')
+      expect(getPrice(now)).to.equal(fast, 'should use fast speed type')
       expect(getPrice(now - 40 * 1000)).to.equal(toGWei(7+(7-3)*1))
       expect(getPrice(now - 70 * 1000)).to.equal(toGWei(7+(7-3)*2))
       expect(getPrice(now - 100 * 1000)).to.equal(toGWei(7+(7-3)*3))
@@ -257,31 +257,31 @@ describe('gasPrice', () => {
       expect(getPrice(now - 100000 * 1000)).to.equal(max)
     })
 
-    it('bump 10 gwei gas price if instant == fast', async () => {
+    it('bump 10 gwei gas price if fast == average', async () => {
       const toGWei = function(wei) {
         return (wei * Math.pow(10, 9)).toString()
       }
       process.env.GET_PRICE_TEST = 'test'
       process.env.GAS_PRICE_BUMP_INTERVAL = 60 * 1000
       config.maxGasPriceLimit = 300
-      config.speedType = 'standard'
+      config.speedType = 'slow'
       // this function only works when env.GET_PRICE_TEST is set to 'test'
-      const standard = toGWei(1)
+      const slow = toGWei(1)
+      const average = toGWei(7)
       const fast = toGWei(7)
-      const instant = toGWei(7)
       const max = toGWei(300)
 
       setTestCachedGasPrice({
-        standard: standard,
+        slow: slow,
+        average: average,
         fast: fast,
-        instant: instant,
       })
 
       const now = Math.floor(Date.now())
 
-      expect(getPrice(now)).to.equal(standard, 'should use standard speed type')
-      expect(getPrice(now - 70 * 1000)).to.equal(fast, 'should use fast speed type')
-      expect(getPrice(now - 130 * 1000)).to.equal(instant, 'should use instant speed type')
+      expect(getPrice(now)).to.equal(slow, 'should use slow speed type')
+      expect(getPrice(now - 70 * 1000)).to.equal(average, 'should use average speed type')
+      expect(getPrice(now - 130 * 1000)).to.equal(fast, 'should use fast speed type')
       expect(getPrice(now - 190 * 1000)).to.equal(toGWei(7+(10)*1))
       expect(getPrice(now - 250 * 1000)).to.equal(toGWei(7+(10)*2))
       // The maximum gas price will be GAS_PRICE_BOUNDARIES.MAX after a long time
@@ -290,9 +290,9 @@ describe('gasPrice', () => {
 
     it('set price from env', async () => {
       setTestCachedGasPrice({
-        standard: 5,
-        fast: 10,
-        instant: 20,
+        slow: 5,
+        average: 10,
+        fast: 20,
         fixed: 1000
       })
 

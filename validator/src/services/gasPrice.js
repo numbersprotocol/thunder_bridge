@@ -30,9 +30,9 @@ const homeBridge = new web3Home.eth.Contract(HomeABI, HOME_BRIDGE_ADDRESS)
 const foreignBridge = new web3Foreign.eth.Contract(ForeignABI, FOREIGN_BRIDGE_ADDRESS)
 
 let cachedGasPrice = {
-  standard: '0',
+  slow: '0',
+  average: '0',
   fast: '0',
-  instant: '0',
 }
 
 function gasPriceWithinLimits(gasPrice) {
@@ -49,11 +49,11 @@ async function fetchGasPriceFromOracle(oracleUrl) {
   const response = await fetch(oracleUrl)
   const json = await response.json()
   const oracleGasPrice = {
-    standard: '0',
+    slow: '0',
+    average: '0',
     fast: '0',
-    instant: '0',
   }
-  const speedTypes = ['standard', 'fast', 'instant']
+  const speedTypes = ['slow', 'average', 'fast']
   for (let i = 0; i < speedTypes.length; i++) {
     const speedType = speedTypes[i]
     const price = json[speedType]
@@ -85,9 +85,9 @@ async function fetchGasPrice({ bridgeContract, oracleFn }) {
   try {
     const p = await bridgeContract.methods.gasPrice().call()
     gasPriceFromBridgeContract = {
-      standard: p,
+      slow: p,
+      average: p,
       fast: p,
-      instant: p,
     }
     logger.debug({ gasPriceFromBridgeContract }, 'Gas price updated using the contracts')
   } catch (e) {
@@ -103,14 +103,14 @@ async function fetchGasPrice({ bridgeContract, oracleFn }) {
   }
 
   const ret = {
-    standard: BN.max(
-      Web3Utils.toBN(gasPriceFromOracle.standard),
-      Web3Utils.toBN(gasPriceFromBridgeContract.standard),
+    slow: BN.max(
+      Web3Utils.toBN(gasPriceFromOracle.slow),
+      Web3Utils.toBN(gasPriceFromBridgeContract.slow),
     ).toString(),
-    fast: BN.max(Web3Utils.toBN(gasPriceFromOracle.fast), Web3Utils.toBN(gasPriceFromBridgeContract.fast)).toString(),
-    instant: BN.max(
-      Web3Utils.toBN(gasPriceFromOracle.instant),
-      Web3Utils.toBN(gasPriceFromBridgeContract.instant),
+    average: BN.max(Web3Utils.toBN(gasPriceFromOracle.average), Web3Utils.toBN(gasPriceFromBridgeContract.average)).toString(),
+    fast: BN.max(
+      Web3Utils.toBN(gasPriceFromOracle.fast),
+      Web3Utils.toBN(gasPriceFromBridgeContract.fast),
     ).toString(),
   }
 
@@ -133,17 +133,17 @@ async function start(chainId) {
     oracleUrl = HOME_GAS_PRICE_ORACLE_URL
     updateInterval = HOME_GAS_PRICE_UPDATE_INTERVAL || DEFAULT_UPDATE_INTERVAL
 
-    cachedGasPrice.standard = HOME_GAS_PRICE_FALLBACK
+    cachedGasPrice.slow = HOME_GAS_PRICE_FALLBACK
+    cachedGasPrice.average = HOME_GAS_PRICE_FALLBACK
     cachedGasPrice.fast = HOME_GAS_PRICE_FALLBACK
-    cachedGasPrice.instant = HOME_GAS_PRICE_FALLBACK
   } else if (chainId === 'foreign') {
     bridgeContract = foreignBridge
     oracleUrl = FOREIGN_GAS_PRICE_ORACLE_URL
     updateInterval = FOREIGN_GAS_PRICE_UPDATE_INTERVAL || DEFAULT_UPDATE_INTERVAL
 
-    cachedGasPrice.standard = FOREIGN_GAS_PRICE_FALLBACK
+    cachedGasPrice.slow = FOREIGN_GAS_PRICE_FALLBACK
+    cachedGasPrice.average = FOREIGN_GAS_PRICE_FALLBACK
     cachedGasPrice.fast = FOREIGN_GAS_PRICE_FALLBACK
-    cachedGasPrice.instant = FOREIGN_GAS_PRICE_FALLBACK
   } else {
     throw new Error(`Unrecognized chainId '${chainId}'`)
   }
@@ -159,11 +159,11 @@ async function start(chainId) {
 
 function getSpeedBase() {
   switch (config.speedType) {
-    case "standard":
+    case "slow":
       return 0
-    case "fast":
+    case "average":
       return 1
-    case "instant":
+    case "fast":
       return 2
     default:
       return 0
@@ -181,18 +181,18 @@ function getPrice(timestamp) {
   const speed = base + Math.floor(dt / process.env.GAS_PRICE_BUMP_INTERVAL)
 
   if (speed == 0) {
-    gasPrice = cachedGasPrice.standard
+    gasPrice = cachedGasPrice.slow
   } else if (speed == 1) {
-    gasPrice = cachedGasPrice.fast
+    gasPrice = cachedGasPrice.average
   } else if (speed >= 2) {
-    // diff = (instant-fast) > 0 ? (instant-fast) : 10
-    let diff = Web3Utils.toBN(cachedGasPrice.instant).sub(Web3Utils.toBN(cachedGasPrice.fast))
+    // diff = (fast-average) > 0 ? (fast-average) : 10
+    let diff = Web3Utils.toBN(cachedGasPrice.fast).sub(Web3Utils.toBN(cachedGasPrice.average))
     if (diff.lte(Web3Utils.toBN(0))) {
       diff = Web3Utils.toBN(Web3Utils.toWei('10', 'gwei'))
     }
-    logger.debug({gasPrice: cachedGasPrice.instant, speed, diff: diff.toString()}, `bump gas price`)
-    // gasPrice = instant + diff * (speed-2)
-    gasPrice = Web3Utils.toBN(cachedGasPrice.instant).add(diff.mul(Web3Utils.toBN(speed - 2)))
+    logger.debug({gasPrice: cachedGasPrice.fast, speed, diff: diff.toString()}, `bump gas price`)
+    // gasPrice = fast + diff * (speed-2)
+    gasPrice = Web3Utils.toBN(cachedGasPrice.fast).add(diff.mul(Web3Utils.toBN(speed - 2)))
     gasPrice = BN.min(
       Web3Utils.toBN(Web3Utils.toWei(config.maxGasPriceLimit.toString(), 'gwei')),
       gasPrice
