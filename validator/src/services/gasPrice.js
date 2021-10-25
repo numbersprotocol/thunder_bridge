@@ -61,7 +61,7 @@ async function fetchGasPriceFromOracle(oracleUrl) {
       throw new Error(`Response from Oracle didn't include gas price for ${speedType} type.`)
     }
     const gasPrice = gasPriceWithinLimits(price)
-    oracleGasPrice[speedType] = Web3Utils.toWei(gasPrice.toString(), 'gwei')
+    oracleGasPrice[speedType] = (gasPrice * 10 ** 9).toFixed(0).toString()
   }
 
   // For devops operation
@@ -215,4 +215,5 @@ module.exports = {
   getPrice,
   gasPriceWithinLimits,
   setTestCachedGasPrice,
+  fetchGasPriceFromOracle,
 }

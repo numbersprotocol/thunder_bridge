@@ -1,7 +1,7 @@
 const sinon = require('sinon')
 const { expect } = require('chai')
 const proxyquire = require('proxyquire').noPreserveCache()
-const { fetchGasPrice, gasPriceWithinLimits, setTestCachedGasPrice, getPrice } = require('../src/services/gasPrice')
+const { fetchGasPrice, fetchGasPriceFromOracle, gasPriceWithinLimits, setTestCachedGasPrice, getPrice } = require('../src/services/gasPrice')
 const config = require('../config')
 const { DEFAULT_UPDATE_INTERVAL, GAS_PRICE_BOUNDARIES } = require('../src/utils/constants')
 
@@ -34,6 +34,16 @@ describe('gasPrice', () => {
 
       // then
       expect(gasPrice).to.equal('1')
+    })
+
+    it('too many decimal places error', async () => {
+      // given
+      const gasPrice = await fetchGasPriceFromOracle(
+        'https://blockscout.com/eth/mainnet/api/v1/gas-price-oracle'
+      )
+
+      // expect gasPrice greater than 10 gwei
+      expect(parseFloat(gasPrice.average)).to.gt(10000000000)
     })
     it('test oracle return zero gas price', async () => {
       // given
