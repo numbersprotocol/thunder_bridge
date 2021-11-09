@@ -8,8 +8,7 @@ const { web3Home, deploymentPrivateKey, HOME_RPC_URL } = require('../web3')
 
 const EternalStorageProxy = require('../../../build/contracts/EternalStorageProxy.json')
 const BridgeValidators = require('../../../build/contracts/BridgeValidators.json')
-const ERC677InitializableToken = require('../../../build/contracts/ERC677InitializableToken.json')
-const ERC677BridgeToken = require('../../../build/contracts/ERC677BridgeToken.json')
+const ERC677InitializableToken = require('../../../build/contracts/ERC677InitializableBridgeToken.json')
 const ERC677MultiBridgeToken = require('../../../build/contracts/ERC677MultiBridgeToken.json')
 const TokenProxy = require('../../../build/contracts/TokenProxy.json')
 const { ZERO_ADDRESS } = require('../constants')
@@ -145,6 +144,7 @@ async function deployHome(homeTokenAddress) {
   let initializableToken
   let tokenAddress = homeTokenAddress
   if (env.BRIDGE_MODE === 'ERC677_TO_ERC677' && !tokenAddress) {
+    console.log('\nset bridge contract on ERC677BridgeToken')
     let ret = await deployErc677MultiplBridgeToken('HOME')
     tokenAddress = ret.erc677tokenAddress
     homeNonce = await web3Home.eth.getTransactionCount(DEPLOYMENT_ACCOUNT_ADDRESS)
@@ -160,6 +160,19 @@ async function deployHome(homeTokenAddress) {
       url: HOME_RPC_URL
     })
     assert.strictEqual(Web3Utils.hexToNumber(addBridgeContract.status), 1, 'Transaction Failed')
+    homeNonce++
+
+    const setBridgeContractData = await token.methods
+      .setBridgeContract(homeBridgeStorage.options.address)
+      .encodeABI({ from: DEPLOYMENT_ACCOUNT_ADDRESS })
+    const setBridgeContract = await sendRawTxHome({
+      data: setBridgeContractData,
+      nonce: homeNonce,
+      to: tokenAddress,
+      privateKey: deploymentPrivateKey,
+      url: HOME_RPC_URL
+    })
+    assert.strictEqual(Web3Utils.hexToNumber(setBridgeContract.status), 1, 'Transaction Failed')
     homeNonce++
   } else if (env.BRIDGE_MODE !== 'ERC_TO_NATIVE') {
     console.log('\n[Home] deploying initializable token')
@@ -210,6 +223,20 @@ async function deployHome(homeTokenAddress) {
       url: HOME_RPC_URL
     })
     assert.strictEqual(Web3Utils.hexToNumber(setBridgeContract.status), 1, 'Transaction Failed')
+    homeNonce++
+
+    console.log('\add bridge contract on ERC677BridgeToken')
+    const addBridgeContractData = await initializableToken.methods
+      .addBridgeContract(homeBridgeStorage.options.address)
+      .encodeABI({ from: DEPLOYMENT_ACCOUNT_ADDRESS })
+    const addBridgeContract = await sendRawTxHome({
+      data: addBridgeContractData,
+      nonce: homeNonce,
+      to: initializableToken.options.address,
+      privateKey: deploymentPrivateKey,
+      url: HOME_RPC_URL
+    })
+    assert.strictEqual(Web3Utils.hexToNumber(addBridgeContract.status), 1, 'Transaction Failed')
     homeNonce++
 
     console.log('transferring ownership of Bridgeble token to homeBridge contract')

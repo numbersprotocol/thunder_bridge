@@ -1,5 +1,6 @@
 const sinon = require('sinon')
-const { expect } = require('chai')
+const { BN } = require("web3").utils;
+const { expect } = require('chai').use(require('bn-chai')(BN))
 const proxyquire = require('proxyquire').noPreserveCache()
 const { fetchGasPrice, fetchGasPriceFromOracle, gasPriceWithinLimits, setTestCachedGasPrice, getPrice } = require('../src/services/gasPrice')
 const config = require('../config')
@@ -43,7 +44,7 @@ describe('gasPrice', () => {
       )
 
       // expect gasPrice greater than 10 gwei
-      expect(parseFloat(gasPrice.average)).to.gt(10000000000)
+      expect(parseFloat(gasPrice.average)).to.be.gt.BN('10000000000')
     })
     it('test oracle return zero gas price', async () => {
       // given

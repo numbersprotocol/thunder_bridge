@@ -376,7 +376,7 @@ contract('ForeignBridge_ERC677_to_NATIVE', async (accounts) => {
       const foreignBridge = await ForeignBridge.new()
       await foreignBridge.initialize(validatorContract.address, token.address, requireBlockConfirmations, gasPrice, maxPerTx, homeDailyLimit, homeMaxPerTx, owner, feePercent);
       await token.mint(user, halfEther, { from: owner }).should.be.fulfilled
-      await token.setBridgeContract(foreignBridge.address, {from: owner})
+      await token.addBridgeContract(foreignBridge.address, {from: owner})
       await token.transferOwnership(foreignBridge.address, {from: owner})
 
       await foreignBridge.onTokenTransfer(user, halfEther, '0x', { from: owner }).should.be.rejectedWith(ERROR_MSG)
@@ -393,7 +393,7 @@ contract('ForeignBridge_ERC677_to_NATIVE', async (accounts) => {
       const foreignBridge = await ForeignBridge.new()
       await foreignBridge.initialize(validatorContract.address, token.address, requireBlockConfirmations, gasPrice, maxPerTx, homeDailyLimit, homeMaxPerTx, owner, feePercent);
       await token.mint(user, halfEther, { from: owner }).should.be.fulfilled
-      await token.setBridgeContract(foreignBridge.address, {from: owner})
+      await token.addBridgeContract(foreignBridge.address, {from: owner})
       await token.transferOwnership(foreignBridge.address, { from: owner })
 
       await token.transferAndCall(foreignBridge.address, halfEther, user2, { from: user }).should.be.fulfilled
@@ -408,7 +408,7 @@ contract('ForeignBridge_ERC677_to_NATIVE', async (accounts) => {
       const foreignBridge = await ForeignBridge.new()
       await foreignBridge.initialize(validatorContract.address, token.address, requireBlockConfirmations, gasPrice, maxPerTx, homeDailyLimit, homeMaxPerTx, owner, feePercent);
       await token.mint(user, halfEther, { from: owner }).should.be.fulfilled
-      await token.setBridgeContract(foreignBridge.address, {from: owner})
+      await token.addBridgeContract(foreignBridge.address, {from: owner})
       await token.transferOwnership(foreignBridge.address, {from: owner})
 
       await token.transfer(foreignBridge.address, halfEther, { from: user }).should.be.fulfilled

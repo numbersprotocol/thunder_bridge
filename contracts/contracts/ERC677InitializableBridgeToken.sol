@@ -1,19 +1,18 @@
 pragma solidity 0.4.24;
 
-import "./ERC677BridgeToken.sol";
+import "./ERC677InitializableToken.sol";
 
-contract ERC677MultiBridgeToken is ERC677BridgeToken {
+contract ERC677InitializableBridgeToken is ERC677InitializableToken {
     mapping(address => bool) internal validBridgeContract;
 
-    constructor(
-        string _name,
-        string _symbol,
-        uint8 _decimals)
-    public ERC677BridgeToken(_name, _symbol, _decimals) {}
+    function initialize(string _name, string _symbol, uint8 _decimals, address _owner) external initializer {
+        ERC20Mintable.initialize(_owner);
+        ERC20Detailed.initialize(_name, _symbol, _decimals);
+    }
 
-    function addBridgeContract(address _bridgeContract) onlyOwner public {
-        require(_bridgeContract != address(0) && isContract(_bridgeContract));
-        validBridgeContract[_bridgeContract] = true;
+    function addBridgeContract(address _contract) onlyOwner public {
+        require(_contract != address(0) && isContract(_contract));
+        validBridgeContract[_contract] = true;
     }
 
     function removeBridgeContract(address _contract) onlyOwner public {
@@ -21,18 +20,8 @@ contract ERC677MultiBridgeToken is ERC677BridgeToken {
         validBridgeContract[_contract] = false;
     }
 
-    function isBridgeContract(address _bridge) public view returns (bool) {
-        return validBridgeContract[_bridge];
-    }
-
-    function transfer(address _to, uint256 _value) public returns (bool)
-    {
-        require(superTransfer(_to, _value), "failed superTransfer");
-        fundReceiver(_to);
-        if (isBridgeContract(_to) && !contractFallback(_to, _value, new bytes(0))) {
-            revert("reverted here");
-        }
-        return true;
+    function isBridgeContract(address _contract) public view returns (bool) {
+        return validBridgeContract[_contract];
     }
 
     function transferAndCall(address _to, uint _value, bytes _data)
@@ -49,6 +38,18 @@ contract ERC677MultiBridgeToken is ERC677BridgeToken {
                 emit ContractFallbackCallFailed(msg.sender, _to, _value);
             }
         }
+
+        return true;
+    }
+
+    function transfer(address _to, uint256 _value) public returns (bool)
+    {
+        require(superTransfer(_to, _value), "failed superTransfer");
+        fundReceiver(_to);
+        if (isBridgeContract(_to) && !contractFallback(_to, _value, new bytes(0))) {
+            revert("reverted here");
+        }
+
         return true;
     }
 
