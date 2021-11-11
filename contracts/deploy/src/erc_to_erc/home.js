@@ -12,7 +12,7 @@ const ERC677InitializableToken = require('../../../build/contracts/ERC677Initial
 const ERC677MultiBridgeToken = require('../../../build/contracts/ERC677MultiBridgeToken.json')
 const TokenProxy = require('../../../build/contracts/TokenProxy.json')
 const { ZERO_ADDRESS } = require('../constants')
-const {deployErc677MultiplBridgeToken} = require('../utils/deployERC20Token')
+const { deployErc677MultiplBridgeToken } = require('../utils/deployERC20Token')
 
 const VALIDATORS = env.VALIDATORS.split(' ')
 
@@ -174,6 +174,20 @@ async function deployHome(homeTokenAddress) {
     })
     assert.strictEqual(Web3Utils.hexToNumber(setBridgeContract.status), 1, 'Transaction Failed')
     homeNonce++
+
+    console.log('transferring ownership of Bridgeble token to homeBridge contract')
+    const txOwnershipData = await token.methods
+      .transferOwnership(homeBridgeStorage.options.address)
+      .encodeABI({ from: DEPLOYMENT_ACCOUNT_ADDRESS })
+    const txOwnership = await sendRawTxHome({
+      data: txOwnershipData,
+      nonce: homeNonce,
+      to: token.options.address,
+      privateKey: deploymentPrivateKey,
+      url: HOME_RPC_URL
+    })
+    assert.strictEqual(Web3Utils.hexToNumber(txOwnership.status), 1, 'Transaction Failed')
+    homeNonce++
   } else if (env.BRIDGE_MODE !== 'ERC_TO_NATIVE') {
     console.log('\n[Home] deploying initializable token')
     initializableToken = await deployContract(
@@ -225,7 +239,7 @@ async function deployHome(homeTokenAddress) {
     assert.strictEqual(Web3Utils.hexToNumber(setBridgeContract.status), 1, 'Transaction Failed')
     homeNonce++
 
-    console.log('\add bridge contract on ERC677BridgeToken')
+    console.log('add bridge contract on ERC677BridgeToken')
     const addBridgeContractData = await initializableToken.methods
       .addBridgeContract(homeBridgeStorage.options.address)
       .encodeABI({ from: DEPLOYMENT_ACCOUNT_ADDRESS })
