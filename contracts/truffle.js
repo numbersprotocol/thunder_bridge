@@ -79,6 +79,29 @@ module.exports = {
       network_id: 1,
       gasPrice: 1000000000
     },
+    rinkeby: {
+      provider: () => {
+        if (privateKeys === null) {
+          throw new Error("Create a .private-keys file");
+        }
+        if (infuraProjectId === null) {
+          throw new Error('Set "infura_project_id" in local.jsonc');
+        }
+        if (infuraProjectSecret === null) {
+          throw new Error('Set "infura_project_secret" in local.jsonc');
+        }
+        // FIXME: infuraProjectSecret not used yet
+        return new HDWalletProvider(
+          privateKeys,
+          `https://rinkeby.infura.io/v3/${infuraProjectId}`,
+          0 /*address_index*/,
+          privateKeys.length /*num_address*/
+        );
+      },
+      network_id: 4,
+      gas: 4700000,
+      gasPrice: 80000000000
+    },
     kovan: {
       provider: () => {
         if (privateKeys === null) {
@@ -101,7 +124,21 @@ module.exports = {
       network_id: 42,
       gasPrice: 1000000000
     },
-
+    "bsc-testnet": {
+      provider: () => {
+        if (privateKeys === null) {
+          throw new Error("Create a .private-keys file");
+        }
+        return new HDWalletProvider(
+          privateKeys,
+          `https://data-seed-prebsc-1-s1.binance.org:8545/`,
+          0 /*address_index*/,
+          privateKeys.length /*num_address*/
+        );
+      },
+      network_id: 97,
+      gasPrice: 10000000000
+    },
     core: {
       host: "localhost",
       port: "8777",
