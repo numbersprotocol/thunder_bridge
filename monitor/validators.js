@@ -49,7 +49,7 @@ function main ({
       logger.error(e)
       gasPriceInGwei = GAS_PRICE_FALLBACK
     }
-    const gasPrice = new Web3Utils.BN(Web3Utils.toWei(gasPriceInGwei.toString(10), 'gwei'))
+    const gasPrice = new Web3Utils.BN(Web3Utils.toWei(gasPriceInGwei.toFixed(8), 'gwei'))
     return [gasPriceInGwei, gasPrice]
   }
 

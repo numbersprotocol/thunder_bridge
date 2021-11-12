@@ -35,6 +35,7 @@ services:
     build: ../../monitor
     restart: always
     environment:
+      REDIS_URL: redis://redis
       VIRTUAL_HOST: $METRICS_HOSTNAME
       LETSENCRYPT_HOST: $METRICS_HOSTNAME
     depends_on:
