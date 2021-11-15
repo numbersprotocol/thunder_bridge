@@ -6,14 +6,13 @@ groups:
       labels:
         severity: page
       annotations:
-        summary: "Low funds on {{ $labels.validator }} validator in {{ $labels.network }} network"
+        summary: "Low funds warning"
+        description: "\n[{{ $labels.network }}] `{{ $labels.validator }}` LEFT TX: `{{ $value }}`"
 
     - alert: data_missing
       expr: >-
-        absent(bridge_deposits{network="home", token="FAU"}) or
-        absent(bridge_deposits{network="foreign", token="FAU"}) or
-        absent(bridge_deposits{network="home", token="Z"}) or
-        absent(bridge_deposits{network="foreign", token="Z"})
+        absent(bridge_deposits{network="home", token="NUM"}) or
+        absent(bridge_deposits{network="foreign", token="NUM"})
       for: 10m
       labels:
         severity: page

@@ -23,14 +23,16 @@ global:
 
 
 route:
-  receiver: 'email'
+  receiver: 'slack'
 
 receivers:
      - name: email
 
-#     - name: slack
-#       slack_configs:
-#           - send_resolved: true
-#             username: '<username>'
-#             channel: '#<channel-name>'
-#             api_url: '<incomming-webhook-url>'
+     - name: slack
+       slack_configs:
+           - send_resolved: true
+             username: 'NUM Bridge Validators'
+             channel: '#backend-alert'
+             api_url: ''
+             title: "{{ range .Alerts }}{{ .Annotations.summary }}\n{{ end }}"
+             text: "*Details:* {{ range .Alerts }}{{ .Annotations.description }}\n{{ end }}"
