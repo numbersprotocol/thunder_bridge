@@ -143,52 +143,10 @@ async function deployHome(homeTokenAddress) {
 
   let initializableToken
   let tokenAddress = homeTokenAddress
-  if (env.BRIDGE_MODE === 'ERC677_TO_ERC677' && !tokenAddress) {
-    console.log('\nset bridge contract on ERC677BridgeToken')
-    let ret = await deployErc677MultiplBridgeToken('HOME')
-    tokenAddress = ret.erc677tokenAddress
-    homeNonce = await web3Home.eth.getTransactionCount(DEPLOYMENT_ACCOUNT_ADDRESS)
-    let token = new web3Home.eth.Contract(ERC677MultiBridgeToken.abi, tokenAddress)
-    const addBridgeContractData = await token.methods
-      .addBridgeContract(homeBridgeStorage.options.address)
-      .encodeABI({ from: DEPLOYMENT_ACCOUNT_ADDRESS })
-    const addBridgeContract = await sendRawTxHome({
-      data: addBridgeContractData,
-      nonce: homeNonce,
-      to: tokenAddress,
-      privateKey: deploymentPrivateKey,
-      url: HOME_RPC_URL
-    })
-    assert.strictEqual(Web3Utils.hexToNumber(addBridgeContract.status), 1, 'Transaction Failed')
-    homeNonce++
-
-    const setBridgeContractData = await token.methods
-      .setBridgeContract(homeBridgeStorage.options.address)
-      .encodeABI({ from: DEPLOYMENT_ACCOUNT_ADDRESS })
-    const setBridgeContract = await sendRawTxHome({
-      data: setBridgeContractData,
-      nonce: homeNonce,
-      to: tokenAddress,
-      privateKey: deploymentPrivateKey,
-      url: HOME_RPC_URL
-    })
-    assert.strictEqual(Web3Utils.hexToNumber(setBridgeContract.status), 1, 'Transaction Failed')
-    homeNonce++
-
-    console.log('transferring ownership of Bridgeble token to homeBridge contract')
-    const txOwnershipData = await token.methods
-      .transferOwnership(homeBridgeStorage.options.address)
-      .encodeABI({ from: DEPLOYMENT_ACCOUNT_ADDRESS })
-    const txOwnership = await sendRawTxHome({
-      data: txOwnershipData,
-      nonce: homeNonce,
-      to: token.options.address,
-      privateKey: deploymentPrivateKey,
-      url: HOME_RPC_URL
-    })
-    assert.strictEqual(Web3Utils.hexToNumber(txOwnership.status), 1, 'Transaction Failed')
-    homeNonce++
-  } else if (env.BRIDGE_MODE !== 'ERC_TO_NATIVE') {
+  if (
+    (env.BRIDGE_MODE !== 'ERC_TO_NATIVE' && env.BRIDGE_MODE !== 'ERC677_TO_ERC677') ||
+    (env.BRIDGE_MODE === 'ERC677_TO_ERC677' && !tokenAddress)
+  ) {
     console.log('\n[Home] deploying initializable token')
     initializableToken = await deployContract(
       ERC677InitializableToken,
@@ -310,7 +268,7 @@ async function deployHome(homeTokenAddress) {
         HOME_MIN_AMOUNT_PER_TX,
         HOME_GAS_PRICE,
         HOME_REQUIRED_BLOCK_CONFIRMATIONS,
-        tokenAddress,
+        tokenAddress ? tokenAddress : initializableToken.options.address,
         FOREIGN_DAILY_LIMIT,
         FOREIGN_MAX_AMOUNT_PER_TX,
         HOME_BRIDGE_OWNER,
@@ -373,7 +331,7 @@ async function deployHome(homeTokenAddress) {
   if (env.BRIDGE_MODE === 'ERC_TO_NATIVE') {
     homeBridgeTokenAddress = homeBridgeStorage.options.address
   } else if (env.BRIDGE_MODE === 'ERC677_TO_ERC677') {
-    homeBridgeTokenAddress = tokenAddress
+    homeBridgeTokenAddress = tokenAddress ? tokenAddress : initializableToken.options.address
   } else {
     homeBridgeTokenAddress = initializableToken.options.address
   }

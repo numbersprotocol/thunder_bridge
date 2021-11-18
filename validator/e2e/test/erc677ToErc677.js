@@ -18,11 +18,27 @@ homeWeb3.eth.accounts.wallet.add(user.privateKey)
 foreignWeb3.eth.accounts.wallet.add(user.privateKey)
 
 const tokenAbi = require('../abis/ERC677BridgeToken.abi')
+const HomeBridgeErc677ToErc677WithFee = require('../abis/HomeBridgeErc677ToErc677WithFee.json')
 const erc20Token = new foreignWeb3.eth.Contract(tokenAbi, deployed.erc20Token.address)
 const erc677Token = new homeWeb3.eth.Contract(tokenAbi, deployed.homeBridge.erc677.address)
 
 describe('erc677 to erc677', () => {
   it('should convert tokens in home to tokens in foreign', async () => {
+    const homeBridge = await new homeWeb3.eth.Contract(HomeBridgeErc677ToErc677WithFee.abi, HOME_BRIDGE_ADDRESS)
+    const mintData = await erc677Token.methods
+      .mint(user.address, Web3.utils.toWei('100'))
+      .encodeABI({ from: user.address })
+
+    await homeBridge.methods
+      .callToken(mintData)
+      .send({
+        from: user.address,
+        gas: '10000000',
+      })
+      .catch((e) => {
+        console.error(e)
+      })
+
     const originalBalance = await erc20Token.methods.balanceOf(user.address).call()
     console.log('foreign origin balance:', originalBalance)
 

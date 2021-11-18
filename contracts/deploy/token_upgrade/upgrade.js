@@ -35,11 +35,8 @@ if (CHAIN === 'HOME') {
   if (BRIDGE_MODE === 'ERC_TO_NATIVE') {
     throw new Error(`No Bridge token in ${BRIDGE_MODE} mode`)
   }
-  if (BRIDGE_MODE === 'ERC677_TO_ERC677') {
-    newTokenAbi = ERC677MultiBridgeToken
-  } else {
-    newTokenAbi = ERC677InitializableBridgeToken
-  }
+
+  newTokenAbi = ERC677InitializableBridgeToken
   bridgeContractABI = HomeBridgeErcToErcWithFee.abi
 } else if (CHAIN === 'FOREIGN') {
   if (BRIDGE_MODE !== 'ERC677_TO_ERC677' && BRIDGE_MODE !== 'ERC_TO_NATIVE') {
