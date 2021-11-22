@@ -85,17 +85,23 @@ contract('ERC677MultiBridgeToken', async (accounts) => {
   it("should not trigger onTokenTransfer for untrusted contract when transfer", async () => {
     let bridge = await AlwaysFail.new();
 
-    token.mint(owner, ether('10'));
+    await token.mint(owner, ether('10'));
     await token.transfer(bridge.address, ether('0.1')).should.be.fulfilled
     expect(await token.balanceOf(bridge.address)).to.be.bignumber.equal(web3.utils.toWei("0.1"))
   })
 
+  it("should trigger onTokenTransfer and reverted when transferAndCall for trusted contract failed", async () => {
+    let bridge = await AlwaysFail.new();
+
+    await token.mint(owner, ether('10'));
+    await token.addBridgeContract(bridge.address);
+    await token.transferAndCall(bridge.address, ether('0.1'), '0x').should.be.rejectedWith(ERROR_MSG);
+  })
   it("should not trigger onTokenTransfer for untrusted contract when transferAndCall", async () => {
     let bridge = await AlwaysFail.new();
 
-    token.mint(owner, ether('10'));
-    await token.transferAndCall(bridge.address, ether('0.1'), '0x').should.be.fulfilled
-    expect(await token.balanceOf(bridge.address)).to.be.bignumber.equal(web3.utils.toWei("0.1"))
+    await token.mint(owner, ether('10'));
+    await token.transferAndCall(bridge.address, ether('0.1'), '0x').should.be.fulfilled;
   })
 });
 
@@ -146,16 +152,19 @@ contract("ERC677InitializableBridgeToken", async (accounts) => {
     await token.transferAndCall(bridge.address, ether('0.1'), '0x').should.be.rejectedWith(ERROR_MSG)
   })
 
-  it("should trigger onTokenTransfer when transferAndCall and success with fallback fail event", async () => {
+  it("should trigger onTokenTransfer and reverted when transferAndCall for trusted contract failed", async () => {
     let bridge = await AlwaysFail.new();
 
-    token.mint(owner, ether('10'));
-    let { logs } = await token.transferAndCall(bridge.address, ether('0.1'), '0x').should.be.fulfilled;
-    expectEventInLogs(logs, 'ContractFallbackCallFailed', {
-      from: owner,
-      to: bridge.address,
-      value: ether('0.1')
-    });
+    await token.mint(owner, ether('10'));
+    await token.addBridgeContract(bridge.address);
+    await token.transferAndCall(bridge.address, ether('0.1'), '0x').should.be.rejectedWith(ERROR_MSG);
+  })
+
+  it("should not trigger onTokenTransfer for untrusted contract when transferAndCall", async () => {
+    let bridge = await AlwaysFail.new();
+
+    await token.mint(owner, ether('10'));
+    await token.transferAndCall(bridge.address, ether('0.1'), '0x').should.be.fulfilled;
   })
 })
 
@@ -370,6 +379,7 @@ contract('ERC677BridgeToken', async (accounts) => {
       const callDoSomething123 = receiver.contract.methods.doSomething(123).encodeABI()
 
       await token.mint(user, 1, {from: owner }).should.be.fulfilled;
+      await token.addBridgeContract(receiver.address);
       await token.transferAndCall(token.address, '1', callDoSomething123, {from: user}).should.be.rejectedWith(ERROR_MSG);
       await token
         .transferAndCall(ZERO_ADDRESS, '1', callDoSomething123, { from: user })

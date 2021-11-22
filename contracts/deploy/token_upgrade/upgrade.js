@@ -18,7 +18,8 @@ const {
   DEPLOYMENT_PRIVATE_KEY,
   ADMIN_PRIVATE_KEY,
   BRIDGE_ADDRESS,
-  BRIDGE_OWNER_PRIVATE_KEY
+  BRIDGE_OWNER_PRIVATE_KEY,
+  DEPLOYMENT_GAS_PRICE
 } = process.env
 
 const web3 = new Web3(new Web3.providers.HttpProvider(RPC_URL))
@@ -79,7 +80,8 @@ async function main() {
 
   const deploymentTx = await deployer.signTransaction({
     data: deploymentData,
-    gas: estimateGas
+    gas: estimateGas,
+    gasPrice: DEPLOYMENT_GAS_PRICE
   })
 
   txResult = await web3.eth.sendSignedTransaction(deploymentTx.rawTransaction)
@@ -107,7 +109,8 @@ async function main() {
     tx = await deployer.signTransaction({
       data: initializeData,
       to: newImpl.options.address,
-      gas: estimateGas
+      gas: estimateGas,
+      gasPrice: DEPLOYMENT_GAS_PRICE
     })
 
     txResult = await web3.eth.sendSignedTransaction(tx.rawTransaction)
@@ -129,7 +132,8 @@ async function main() {
   tx = await admin.signTransaction({
     data: upgradeToData,
     to: PROXY_ADDRESS,
-    gas: estimateGas
+    gas: estimateGas,
+    gasPrice: DEPLOYMENT_GAS_PRICE
   })
 
   txResult = await web3.eth.sendSignedTransaction(tx.rawTransaction)
@@ -153,7 +157,8 @@ async function main() {
   tx = await bridgeOwner.signTransaction({
     data: callTokenData,
     to: BRIDGE_ADDRESS,
-    gas: estimateGas
+    gas: estimateGas,
+    gasPrice: DEPLOYMENT_GAS_PRICE
   })
 
   txResult = await web3.eth.sendSignedTransaction(tx.rawTransaction)

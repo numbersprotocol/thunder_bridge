@@ -18,7 +18,7 @@ contract ERC677MultiBridgeToken is ERC677BridgeToken {
 
     function removeBridgeContract(address _contract) onlyOwner public {
         require(_contract != address(0) && isContract(_contract));
-        validBridgeContract[_contract] = false;
+        delete validBridgeContract[_contract];
     }
 
     function isBridgeContract(address _bridge) public view returns (bool) {
@@ -42,12 +42,8 @@ contract ERC677MultiBridgeToken is ERC677BridgeToken {
         fundReceiver(_to);
         emit Transfer(msg.sender, _to, _value, _data);
 
-        if (isContract(_to) && !contractFallback(_to, _value, _data)) {
-            if (isBridgeContract(_to)) {
-                revert("reverted here");
-            } else {
-                emit ContractFallbackCallFailed(msg.sender, _to, _value);
-            }
+        if (isBridgeContract(_to) && !contractFallback(_to, _value, _data)) {
+            revert("reverted here");
         }
         return true;
     }
