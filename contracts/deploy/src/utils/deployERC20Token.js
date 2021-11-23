@@ -17,7 +17,6 @@ const {
   HOME_RPC_URL
 } = require('../web3')
 
-const ERC677BridgeToken = require('../../../build/contracts/ERC677BridgeToken.json')
 const ERC677MultiBridgeToken = require("../../../build/contracts/ERC677MultiBridgeToken.json")
 
 const {
@@ -97,7 +96,7 @@ async function deployErc677TokenInternal(chain, tokenAbi, noMint) {
 }
 
 async function deployErc677Token(chain) {
-  return deployErc677TokenInternal(chain, ERC677BridgeToken, false);
+  return deployErc677TokenInternal(chain, ERC677MultiBridgeToken, false);
 }
 
 async function deployErc677MultiplBridgeToken(chain) {

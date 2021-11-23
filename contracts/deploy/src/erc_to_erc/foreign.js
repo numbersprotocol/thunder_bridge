@@ -5,7 +5,7 @@ const env = require('../loadEnv')
 const { deployContract, privateKeyToAddress, sendRawTxForeign } = require('../deploymentUtils')
 const { web3Foreign, deploymentPrivateKey, FOREIGN_RPC_URL } = require('../web3')
 
-const ERC677InitializableToken = require('../../../build/contracts/ERC677InitializableToken.json')
+const ERC677InitializableToken = require('../../../build/contracts/ERC677InitializableBridgeToken.json')
 const EternalStorageProxy = require('../../../build/contracts/EternalStorageProxy.json')
 const BridgeValidators = require('../../../build/contracts/BridgeValidators.json')
 const TokenProxy = require('../../../build/contracts/TokenProxy.json')
@@ -226,6 +226,20 @@ async function deployForeign(foreignTokenAddress) {
       url: FOREIGN_RPC_URL
     })
     assert.strictEqual(Web3Utils.hexToNumber(setBridgeContract.status), 1, 'Transaction Failed')
+    foreignNonce++
+
+    console.log('\add bridge contract on ERC677BridgeToken')
+    const addBridgeContractData = await initializableToken.methods
+      .addBridgeContract(foreignBridgeStorage.options.address)
+      .encodeABI({ from: DEPLOYMENT_ACCOUNT_ADDRESS })
+    const addBridgeContract = await sendRawTxForeign({
+      data: addBridgeContractData,
+      nonce: foreignNonce,
+      to: initializableToken.options.address,
+      privateKey: deploymentPrivateKey,
+      url: FOREIGN_RPC_URL
+    })
+    assert.strictEqual(Web3Utils.hexToNumber(addBridgeContract.status), 1, 'Transaction Failed')
     foreignNonce++
 
     console.log('transferring ownership of Bridgeble token to homeBridge contract')

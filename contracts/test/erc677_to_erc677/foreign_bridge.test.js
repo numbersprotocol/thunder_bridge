@@ -675,7 +675,7 @@ contract("ForeignBridge_ERC677_to_ERC677", async accounts => {
         feePercent
       );
       await token.mint(user, halfEther, { from: owner }).should.be.fulfilled;
-      await token.setBridgeContract(foreignBridge.address, { from: owner });
+      await token.addBridgeContract(foreignBridge.address, { from: owner });
       await token.transferOwnership(foreignBridge.address, { from: owner });
 
       await foreignBridge
@@ -708,7 +708,7 @@ contract("ForeignBridge_ERC677_to_ERC677", async accounts => {
         feePercent
       );
       await token.mint(user, halfEther, { from: owner }).should.be.fulfilled;
-      await token.setBridgeContract(foreignBridge.address, { from: owner });
+      await token.addBridgeContract(foreignBridge.address, { from: owner });
       await token.transferOwnership(foreignBridge.address, { from: owner });
 
       await token.transferAndCall(foreignBridge.address, halfEther, user2, {
@@ -740,7 +740,7 @@ contract("ForeignBridge_ERC677_to_ERC677", async accounts => {
         feePercent
       );
       await token.mint(user, halfEther, { from: owner }).should.be.fulfilled;
-      await token.setBridgeContract(foreignBridge.address, { from: owner });
+      await token.addBridgeContract(foreignBridge.address, { from: owner });
       await token.transferOwnership(foreignBridge.address, { from: owner });
 
       await token.transfer(foreignBridge.address, halfEther, { from: user })
