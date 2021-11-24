@@ -2,7 +2,15 @@
 
 # Thunder bridge UI local run
 ## Environment
+
+### Node Version
+
+```
+14
+```
+
 ### OS X
+
 
 - Install [Homebrew](https://brew.sh/)
 ```
