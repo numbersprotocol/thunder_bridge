@@ -1122,6 +1122,11 @@
     background-image: url(#{$base-images-path + '/logos/husd.png'});
   }
 
+  &-num,
+  &-erc20-num {
+    background-image: url(#{$base-images-path + '/logos/num.png'});
+  }
+
   &-tt,
   &-bep20-tt,
   &-erc20-tt,
