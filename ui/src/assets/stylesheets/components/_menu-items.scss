@@ -5,7 +5,7 @@
   margin: 0 15px;
   text-decoration: none;
 
-  @media screen and (max-width: $mobile-width) {
+  @media screen and (max-width: $tablet-width) {
     background-image: linear-gradient(to bottom, #fcf082, #f9dd4b);
     margin: 0;
     padding: 0;

@@ -38,6 +38,7 @@
   "components.i18n.Footer.helpCenter": "Центр поддержки",
   "components.i18n.Footer.thundercoreBridge": "ThunderCore Bridge",
   "components.i18n.HeaderMenu.tutorial": "Гайды",
+  "components.i18n.HeaderMenu.audit": "аудита",
   "components.i18n.MenuItems.statistics": "Статистика",
   "components.i18n.MenuItems.status": "Статус",
   "components.i18n.NetworkDetails.bridgeForeignAddress": "Адрес моста в другой сети",

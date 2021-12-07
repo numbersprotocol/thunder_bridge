@@ -38,6 +38,7 @@
   "components.i18n.Footer.helpCenter": "Trung tâm trợ giúp",
   "components.i18n.Footer.thundercoreBridge": "ThunderCore Bridge",
   "components.i18n.HeaderMenu.tutorial": "Hướng dẫn",
+  "components.i18n.HeaderMenu.audit": "kiểm toán",
   "components.i18n.MenuItems.statistics": "Số liệu thống kê",
   "components.i18n.MenuItems.status": "Trạng thái",
   "components.i18n.NetworkDetails.bridgeForeignAddress": "Bridge địa chỉ ngoài",

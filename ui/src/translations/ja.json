@@ -38,6 +38,7 @@
   "components.i18n.Footer.helpCenter": "ヘルプセンター",
   "components.i18n.Footer.thundercoreBridge": "サンダーコアブリッジ",
   "components.i18n.HeaderMenu.tutorial": "チュートリアル",
+  "components.i18n.HeaderMenu.audit": "監査",
   "components.i18n.MenuItems.statistics": "統計",
   "components.i18n.MenuItems.status": "状態",
   "components.i18n.NetworkDetails.bridgeForeignAddress": "トークンブリッジ外部アドレス",

@@ -38,6 +38,7 @@
   "components.i18n.Footer.helpCenter": "幫助中心",
   "components.i18n.Footer.thundercoreBridge": "代幣橋",
   "components.i18n.HeaderMenu.tutorial": "教學",
+  "components.i18n.HeaderMenu.audit": "審計",
   "components.i18n.MenuItems.statistics": "數據",
   "components.i18n.MenuItems.status": "狀態",
   "components.i18n.NetworkDetails.bridgeForeignAddress": "代幣橋對外地址",

@@ -4,9 +4,7 @@
   display: flex;
   justify-content: space-around;
   max-width: 700px;
-  @media screen and (max-width: $mobile-width) {
-    width: 100%;
-  }
   @media screen and (max-width: $tablet-width) {
+    width: 100%;
   }
 }

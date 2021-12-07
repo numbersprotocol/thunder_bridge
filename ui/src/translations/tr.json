@@ -38,6 +38,7 @@
   "components.i18n.Footer.helpCenter": "Yardım Merkezi",
   "components.i18n.Footer.thundercoreBridge": "ThunderCore Bridge",
   "components.i18n.HeaderMenu.tutorial": "Öğretici",
+  "components.i18n.HeaderMenu.audit": "Denetim",
   "components.i18n.MenuItems.statistics": "İstatistikler",
   "components.i18n.MenuItems.status": "Durum",
   "components.i18n.NetworkDetails.bridgeForeignAddress": "Yabancı Adresi Köprüle",

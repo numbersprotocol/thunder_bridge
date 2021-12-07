@@ -38,6 +38,7 @@
   "components.i18n.Footer.helpCenter": "帮助中心",
   "components.i18n.Footer.thundercoreBridge": "代币桥",
   "components.i18n.HeaderMenu.tutorial": "教学",
+  "components.i18n.HeaderMenu.audit": "审计",
   "components.i18n.MenuItems.statistics": "数据",
   "components.i18n.MenuItems.status": "状态",
   "components.i18n.NetworkDetails.bridgeForeignAddress": "代币桥对外地址",

@@ -38,6 +38,7 @@
   "components.i18n.Footer.helpCenter": "Help Center",
   "components.i18n.Footer.thundercoreBridge": "ThunderCore Bridge",
   "components.i18n.HeaderMenu.tutorial": "Tutorial",
+  "components.i18n.HeaderMenu.audit": "Audit",
   "components.i18n.MenuItems.statistics": "Statistics",
   "components.i18n.MenuItems.status": "Status",
   "components.i18n.NetworkDetails.bridgeForeignAddress": "Bridge Foreign Address",

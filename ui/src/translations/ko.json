@@ -38,6 +38,7 @@
   "components.i18n.Footer.helpCenter": "도움센터",
   "components.i18n.Footer.thundercoreBridge": "썬더코어 브리지",
   "components.i18n.HeaderMenu.tutorial": "튜토리얼",
+  "components.i18n.HeaderMenu.audit": "심사보고",
   "components.i18n.MenuItems.statistics": "데이터",
   "components.i18n.MenuItems.status": "상태",
   "components.i18n.NetworkDetails.bridgeForeignAddress": "토큰 브리지 외부주소",
