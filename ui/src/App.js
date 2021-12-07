@@ -1,102 +1,87 @@
-import React from "react"
+import React, { useState, useEffect } from "react";
+import { Headers, Footers } from "@thundercore/eco-lib";
 import {
   Header,
   Bridge,
-  RelayEvents,
-  Footer,
   SweetAlert,
   Loading,
   StatusPage,
   StatisticsPage,
-} from "./components"
-import { Route, Switch } from "react-router-dom"
-import "./assets/stylesheets/application.css"
-import { Disclaimer } from "./components"
-import { ModalContainer } from "./components"
-import { NoWallet } from "./components"
+} from "./components";
+import { Route, Switch } from "react-router-dom";
+import "./assets/stylesheets/application.css";
+import { Disclaimer } from "./components";
+import { ModalContainer } from "./components";
+import { NoWallet } from "./components";
 import {
   setItem,
   getItem,
   DISCLAIMER_KEY,
-} from "./components/utils/localstorage"
-import Banner from "./components/Banner"
-import SwithChainButton from "./components/SwithChainButton"
-import NotFound from "./components/NotFound"
-import { LocaleProvider } from "./contexts/localeContext"
+} from "./components/utils/localstorage";
+import { useIntl } from "react-intl";
+import Banner from "./components/Banner";
+import SwithChainButton from "./components/SwithChainButton";
+import NotFound from "./components/NotFound";
+import { LocaleProvider } from "./contexts/localeContext";
 
-class App extends React.Component {
-  state = {
-    showDisclaimer: false,
-    showMobileMenu: false,
-    isBannerOpen: false,
-  }
-
-  componentDidMount() {
-    const disclaimerDisplayed = getItem(DISCLAIMER_KEY)
-
-    if (!disclaimerDisplayed) {
-      this.setState({ showDisclaimer: true })
-    }
-  }
-
-  closeDisclaimer = () => {
-    setItem(DISCLAIMER_KEY, true)
-    this.setState({ showDisclaimer: false })
-  }
-  toggleMobileMenu = () => {
-    this.setState((prevState) => ({
-      showMobileMenu: !prevState.showMobileMenu,
-    }))
-  }
-
-  render() {
-    const { showDisclaimer, showMobileMenu, isBannerOpen } = this.state
-    return (
-      <LocaleProvider>
-        <div className={showMobileMenu ? "mobile-menu-is-open" : ""}>
-          <Route component={Loading} />
-          <Route component={SweetAlert} />
-          <Route
-            render={() => (
-              <Header
-                onMenuToggle={this.toggleMobileMenu}
-                showMobileMenu={showMobileMenu}
-              />
-            )}
-          />
-          <div className="app-container">
-            <SwithChainButton />
-            {showMobileMenu && (
-              <Route render={() => <div className="mobile-menu-open" />} />
-            )}
-            <Switch>
-              {/* <Route exact path="/events" component={RelayEvents} /> */}
-              <Route
-                exact
-                path={["/status", "/(eth|bsc|heco)/status"]}
-                component={StatusPage}
-              />
-              <Route
-                exact
-                path={["/statistics", "/(eth|bsc|heco)/statistics"]}
-                component={StatisticsPage}
-              />
-              <Route exact path={["/", "/(eth|bsc|heco)"]} component={Bridge} />
-              <Route component={NotFound} />
-            </Switch>
-          </div>
-          <Route component={Footer} />
-          <ModalContainer showModal={showDisclaimer}>
-            <Disclaimer onConfirmation={this.closeDisclaimer} />
-          </ModalContainer>
-          <ModalContainer showModal={isBannerOpen}>
-            <Banner closeModal={() => this.setState({ isBannerOpen: false })} />
-          </ModalContainer>
-          <NoWallet showModal={!showDisclaimer} />
-        </div>
-      </LocaleProvider>
-    )
-  }
+export default function AppProviders() {
+  return (
+    <LocaleProvider>
+      <App />
+    </LocaleProvider>
+  );
 }
 
-export default App
+function App() {
+  const [showDisclaimer, setshowDisclaimer] = useState(false);
+  const [isBannerOpen, setisBannerOpen] = useState(false);
+  const intl = useIntl();
+
+  useEffect(() => {
+    const disclaimerDisplayed = getItem(DISCLAIMER_KEY);
+
+    if (!disclaimerDisplayed) {
+      setshowDisclaimer(true);
+    }
+  }, []);
+
+  const closeDisclaimer = () => {
+    setItem(DISCLAIMER_KEY, true);
+    setshowDisclaimer(false);
+  };
+
+  return (
+    <div>
+      <Headers hideLangSelect locale={intl.locale} updateLocale={() => {}} />
+      <Route component={Loading} />
+      <Route component={SweetAlert} />
+      <Route render={() => <Header />} />
+      <div className="app-container">
+        <SwithChainButton />
+        <Switch>
+          {/* <Route exact path="/events" component={RelayEvents} /> */}
+          <Route
+            exact
+            path={["/status", "/(eth|bsc|heco)/status"]}
+            component={StatusPage}
+          />
+          <Route
+            exact
+            path={["/statistics", "/(eth|bsc|heco)/statistics"]}
+            component={StatisticsPage}
+          />
+          <Route exact path={["/", "/(eth|bsc|heco)"]} component={Bridge} />
+          <Route component={NotFound} />
+        </Switch>
+      </div>
+      <ModalContainer showModal={showDisclaimer}>
+        <Disclaimer onConfirmation={closeDisclaimer} />
+      </ModalContainer>
+      <ModalContainer showModal={isBannerOpen}>
+        <Banner closeModal={() => setisBannerOpen(false)} />
+      </ModalContainer>
+      <NoWallet showModal={!showDisclaimer} />
+      <Footers locale={intl.locale} />
+    </div>
+  );
+}
