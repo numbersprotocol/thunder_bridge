@@ -66,7 +66,7 @@ const TransferAlert = ({
           <br />
           <strong>{`${intl.formatMessage(
             { id: "components.i18n.TransferAlert.txFee" },
-            { fee: fee, currency: RenameToken(feeCurrency) }
+            { fee: fee.toString(), currency: RenameToken(feeCurrency) }
           )}`}</strong>
         </p>
         <p className="transfer-description" data-testid="transfer-description">
