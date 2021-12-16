@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Headers, Footers } from "@thundercore/eco-lib";
+import { Providers as EcoProviders, Navbar as EcoHeaders, Footer } from '@thundercore/eco-lib'
 import {
   Header,
   Bridge,
@@ -52,7 +52,8 @@ function App() {
 
   return (
     <div>
-      <Headers hideLangSelect locale={intl.locale} updateLocale={() => {}} />
+    <EcoProviders>
+      <EcoHeaders hideLangSelect locale={intl.locale} updateLocale={() => {}} />
       <Route component={Loading} />
       <Route component={SweetAlert} />
       <Route render={() => <Header />} />
@@ -81,7 +82,8 @@ function App() {
         <Banner closeModal={() => setisBannerOpen(false)} />
       </ModalContainer>
       <NoWallet showModal={!showDisclaimer} />
-      <Footers locale={intl.locale} />
+      <Footer locale={intl.locale} />
+    </EcoProviders>
     </div>
   );
 }
