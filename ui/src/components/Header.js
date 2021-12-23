@@ -21,7 +21,7 @@ export class Header extends React.Component {
       <header className="header">
         <div className="container">
           <div className="header-section">
-            <Link className="header-logo-container">
+            <Link className="header-logo-container" to={{pathname: "/"}}>
               <div className="header-icon" />
             </Link>
           </div>
