@@ -12,4 +12,5 @@ mkdir -p flats/erc20_to_erc20
 ./node_modules/.bin/truffle-flattener contracts/upgradeability/EternalStorageProxy.sol > flats/EternalStorageProxy_flat.sol
 ./node_modules/.bin/truffle-flattener contracts/upgradeable_contracts/BridgeValidators.sol > flats/BridgeValidators_flat.sol
 ./node_modules/.bin/truffle-flattener contracts/ERC677InitializableToken.sol > flats/ERC677InitializableToken.sol
+./node_modules/.bin/truffle-flattener contracts/ERC677MultiBridgeToken.sol > flats/ERC677MultiBridgeToken.sol
 ./node_modules/.bin/truffle-flattener contracts/TokenProxy.sol > flats/TokenProxy.sol
