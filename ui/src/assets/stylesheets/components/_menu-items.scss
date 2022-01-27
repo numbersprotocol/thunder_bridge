@@ -7,8 +7,9 @@
 
   @media screen and (max-width: $tablet-width) {
     background-image: linear-gradient(to bottom, #fcf082, #f9dd4b);
-    margin: 0;
-    padding: 0;
+    margin: 0px auto;
+    padding: 5px 8px;
+    border-radius: 5px;
   }
 
   &:hover {
@@ -23,6 +24,6 @@
   font-size: 14px;
   line-height: 26px;
   @media screen and (max-width: $tablet-width) {
-    margin-left: 10px;
+    margin-left: 0px;
   }
 }
