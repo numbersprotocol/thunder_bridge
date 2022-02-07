@@ -3,11 +3,11 @@ if (process.env.NODE_ENV !== "production")
 
 const express = require('express');
 const client = require('prom-client');
-const fetch = require('node-fetch');
 const HttpRetryProvider = require('./utils/httpRetryProvider')
 const { newRedis } = require('./utils/redisClient')
 const logger = require('pino')()
 const Web3 = require('web3')
+const BN = require("bn.js")
 const { decodeBridgeMode } = require('./utils/bridgeMode')
 const { initSentry } = require('./utils/sentry.js')
 const Sentry = require('@sentry/node')
@@ -62,6 +62,7 @@ let config = existsSync("config.json") ? JSON.parse(readFileSync("config.json", 
     "FOREIGN_MAX_GAS_PRICE_LIMIT": env.FOREIGN_MAX_GAS_PRICE_LIMIT,
   }]))
 
+const foreignWeb3 = new Web3(new HttpRetryProvider(process.env.FOREIGN_RPC_URL.split(",")))
 
 const redis = newRedis(config.REDIS_URL || process.env.REDIS_URL)
 const registry = new client.Registry();
@@ -205,8 +206,17 @@ async function checkVBalances(token) {
 }
 
 async function updateGasPrice() {
-  const resp = await fetch(process.env.GAS_PRICE_ORACLE_URL || 'https://gasprice.poa.network/')
-  const gasPrice = await resp.json()
+  const gas = await foreignWeb3.eth.getGasPrice();
+  const gasBN = new BN(gas)
+  const tenGWei = new BN(Web3.utils.toWei('10', 'gwei'))
+  const slow = gasBN.gt(tenGWei) ? gasBN.sub(tenGWei) : gasBN
+  const fast = gasBN.add(tenGWei)
+
+  const gasPrice = {
+    slow: Web3.utils.fromWei(slow.toString(), "gwei"),
+    average: Web3.utils.fromWei(gasBN.toString(), "gwei"),
+    fast: Web3.utils.fromWei(fast.toString(), "gwei")
+  }
   await redis.updateGasPrice(gasPrice)
 }
 
