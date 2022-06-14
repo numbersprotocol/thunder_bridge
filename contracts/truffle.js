@@ -49,16 +49,6 @@ module.exports = {
       network_id: "*",
       gasPrice: 1000000000
     },
-    home: {
-      host: "localhost",
-      port: 8545,
-      network_id: "*",
-    },
-    foreign: {
-      host: "localhost",
-      port: 8546,
-      network_id: "*",
-    },
     /*
     kovan: {
       host: "localhost",
@@ -169,18 +159,18 @@ module.exports = {
     },
     "thunder-testnet": {
       provider: () => {
-          if (privateKeys === null) {
-            throw new Error("Create a .private-keys file");
-          }
-          return new HDWalletProvider(
-            privateKeys,
-            "https://testnet-rpc.thundercore.com",
-            0 /*address_index*/,
-            privateKeys.length /*num_addresses*/
-          );
-        },
-        network_id: "18"
-      }
+        if (privateKeys === null) {
+          throw new Error("Create a .private-keys file");
+        }
+        return new HDWalletProvider(
+          privateKeys,
+          "https://testnet-rpc.thundercore.com",
+          0 /*address_index*/,
+          privateKeys.length /*num_addresses*/
+        );
+      },
+      network_id: "18"
+    }
   },
   compilers: {
     solc: {

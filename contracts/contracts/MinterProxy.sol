@@ -26,6 +26,8 @@ contract MinterProxy is Ownable {
   event PerMintLimitChanged(uint256 prev, uint256 current);
   event OperatorDayLimitChanged(uint256 prev, uint256 current, address operator);
   event DayLimitChanged(uint256 prev, uint256 current);
+  event OperatorAdded(address operator);
+  event OperatorRemoved(address operator);
 
   modifier isOperator() {
       require(operators[msg.sender] == true);
@@ -46,10 +48,12 @@ contract MinterProxy is Ownable {
   // Owner function
 
   function addOperator(address addr) external onlyOwner {
+    emit OperatorAdded(addr);
     operators[addr] = true;
   }
 
   function removeOperator(address addr) external onlyOwner {
+    emit OperatorRemoved(addr);
     delete operators[addr];
   }
 
@@ -76,13 +80,13 @@ contract MinterProxy is Ownable {
   // Operator functions, or co-minter functions.
   function mint(address _to, uint256 _value) public isOperator returns (bool) {
     if (perMintLimit > 0) {
-      require(_value < perMintLimit, "Exceed per mint limit");
+      require(_value <= perMintLimit, "Exceed per mint limit");
     }
     if (operatorDayLimit[msg.sender] > 0) {
-      require(_value + operatorDaySpent[msg.sender][getCurrentDay()] < operatorDayLimit[msg.sender], "Exceed operator day limit");
+      require(_value + operatorDaySpent[msg.sender][getCurrentDay()] <= operatorDayLimit[msg.sender], "Exceed operator day limit");
     }
     if (dayLimit > 0) {
-      require(_value + totalDaySpent[getCurrentDay()] < dayLimit, "Exceed day limit");
+      require(_value + totalDaySpent[getCurrentDay()] <= dayLimit, "Exceed day limit");
     }
 
     bool res = minter().mint(_to, _value);
