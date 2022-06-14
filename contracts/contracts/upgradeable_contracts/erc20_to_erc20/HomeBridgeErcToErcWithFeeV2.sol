@@ -2,10 +2,7 @@
 pragma solidity 0.4.24;
 
 import "./HomeBridgeErcToErcWithFee.sol";
-
-contract IMinter {
-    function mint(address _to, uint256 _value) public returns (bool);
-}
+import "../../IMinter.sol";
 
 contract HomeBridgeErcToErcWithFeeV2 is HomeBridgeErcToErcWithFee {
     IMinter public minter;
