@@ -2,12 +2,12 @@
 pragma solidity 0.4.24;
 
 import "./HomeBridgeErcToErcWithFee.sol";
-import "../../IMinter.sol";
+import "../../IMinterBurner.sol";
 
 contract HomeBridgeErcToErcWithFeeV2 is HomeBridgeErcToErcWithFee {
-    IMinter public minter;
+    IMinterBurner public minter;
 
-    function setMinter(IMinter _minter) external onlyOwner {
+    function setMinter(IMinterBurner _minter) external onlyOwner {
         minter = _minter;
     }
 

@@ -1,4 +1,4 @@
-const MinterProxy = artifacts.require("MinterProxy.sol");
+const MinterBurnerProxy = artifacts.require("MinterBurnerProxy.sol");
 const ERC677MultiBridgeToken = artifacts.require("ERC677MultiBridgeToken.sol");
 
 const { ERROR_MSG } = require("./setup");
@@ -6,12 +6,12 @@ const { ERROR_MSG } = require("./setup");
 const { expect } = require("chai");
 const Web3 = require("web3");
 
-contract("MinterProxy", async accounts => {
+contract("MinterBurnerProxy", async accounts => {
   let token;
   let minter;
   beforeEach(async () => {
     token = await ERC677MultiBridgeToken.new("Token", "T1", 18);
-    minter = await MinterProxy.new();
+    minter = await MinterBurnerProxy.new();
 
     await minter.initialize(token.address, accounts[0]);
     await token.transferOwnership(minter.address);

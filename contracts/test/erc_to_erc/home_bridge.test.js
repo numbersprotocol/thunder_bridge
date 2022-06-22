@@ -2,7 +2,7 @@ const Web3Utils = require("web3-utils");
 const Web3Abi = require("web3-eth-abi");
 const HomeBridge = artifacts.require("HomeBridgeErcToErcWithFee.sol");
 const HomeBridgeV2 = artifacts.require("HomeBridgeErcToErcWithFeeV2.sol");
-const MinterProxy = artifacts.require("MinterProxy.sol");
+const MinterBurnerProxy = artifacts.require("MinterBurnerProxy.sol");
 const EternalStorageProxy = artifacts.require("EternalStorageProxy.sol");
 const BridgeValidators = artifacts.require("BridgeValidators.sol");
 const ERC677BridgeToken = artifacts.require("ERC677BridgeToken.sol");
@@ -716,7 +716,7 @@ contract("HomeBridge_ERC20_to_ERC20", async accounts => {
         ownerOfValidators
       );
       const token = await ERC677BridgeToken.new("Some ERC20", "RSZT", 18);
-      const minter = await MinterProxy.new();
+      const minter = await MinterBurnerProxy.new();
 
       const homeBridgeWithThreeSigs = await HomeBridgeV2.new();
 

@@ -1,7 +1,7 @@
 require('dotenv').config()
 
 const TokenProxy = require('../build/contracts/TokenProxy.json')
-const MinterProxy = require('../build/contracts/MinterProxy.json')
+const MinterBurnerProxy = require('../build/contracts/MinterBurnerProxy.json')
 const { deployContract, privateKeyToAddress } = require('./src/deploymentUtils')
 const Web3 = require('web3')
 
@@ -22,7 +22,7 @@ async function main() {
   let nonce = await web3Home.eth.getTransactionCount(DEPLOYMENT_ACCOUNT_ADDRESS)
 
   // deploy token wrapper impl
-  let tokenWrapperImpl = await deployContract(MinterProxy, [], {
+  let tokenWrapperImpl = await deployContract(MinterBurnerProxy, [], {
     from: DEPLOYMENT_ACCOUNT_ADDRESS,
     network: 'home',
     nonce
