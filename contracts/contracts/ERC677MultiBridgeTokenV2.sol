@@ -10,7 +10,7 @@ contract ERC677MultiBridgeTokenV2 is ERC677MultiBridgeToken {
         uint8 _decimals)
     public ERC677MultiBridgeToken(_name, _symbol, _decimals) {}
 
-    function burnFrom(address _who, uint256 _amount) public onlyOwner {
+    function burn(address _who, uint256 _amount) public onlyOwner {
         _burn(_who, _amount);
     }
 }

@@ -11,6 +11,7 @@ import "./IMinterBurner.sol";
  */
 contract MinterBurnerProxy is Ownable {
   address public token;
+  uint256 public thunderBridgeSupply;
 
   mapping(address => bool) public operators;
 
@@ -72,6 +73,10 @@ contract MinterBurnerProxy is Ownable {
     return true;
   }
 
+  function setThunderBridgeSupply(uint256 amount) public onlyOwner {
+    thunderBridgeSupply = amount;
+  }
+
   // Limit setting functions
 
   function setDailyMintLimit(uint256 amount) external onlyOwner {
@@ -118,6 +123,7 @@ contract MinterBurnerProxy is Ownable {
 
     bool res = minterBurner().mint(_to, _value);
     if (res) {
+      thunderBridgeSupply += _value;
       totalDailyMinted[getCurrentDay()] += _value;
       operatorDailyMinted[msg.sender][getCurrentDay()] += _value;
     }
@@ -135,7 +141,8 @@ contract MinterBurnerProxy is Ownable {
     if (dailyBurnLimit > 0) {
       require(_value + totalDailyBurned[getCurrentDay()] <= dailyBurnLimit, "Exceed day limit");
     }
-    minterBurner().burnFrom(_who, _value);
+    minterBurner().burn(_who, _value);
+    thunderBridgeSupply -= _value;
     totalDailyBurned[getCurrentDay()] += _value;
     operatorDailyBurned[msg.sender][getCurrentDay()] += _value;
   }
