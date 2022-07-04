@@ -82,6 +82,43 @@ contract("HomeBridgeErcToErcWithFeeV2", async accounts => {
       // should burn all token in bridge contract
       ZERO.should.be.bignumber.equal(await token.balanceOf(homeBridge.address));
     });
+    it("does not modify thunder bridge supply when burn by other operator", async () => {
+      let homeBridge2 = await HomeBridgeErcToErcWithFeeV2.new();
+      await homeBridge2.initialize(
+        validatorContract.address,
+        oneEther,
+        halfEther,
+        minPerTx,
+        gasPrice,
+        requireBlockConfirmations,
+        token.address,
+        foreignDailyLimit,
+        foreignMaxPerTx,
+        owner,
+        0
+      );
+      await homeBridge2.setMinterBurner(minterBurner.address);
+      await minterBurner.addOperator(homeBridge2.address);
+
+      // add homeBridge2 to token's whitelist to trigger onTokenTransfer callback
+      const data = token.contract.methods
+        .addBridgeContract(homeBridge2.address)
+        .encodeABI();
+      await minterBurner.callToken(data).should.be.fulfilled;
+
+      let beforeBalance = await token.totalSupply();
+      await token.transfer(homeBridge2.address, halfEther, {
+        from: user
+      }).should.be.fulfilled;
+
+      // 0.5 ether is burned, but thunder bridge supply should not be modified
+      beforeBalance
+        .sub(halfEther)
+        .should.be.bignumber.equal(await token.totalSupply());
+      beforeBalance.should.be.bignumber.equal(
+        await minterBurner.thunderBridgeSupply()
+      );
+    });
   });
 
   describe("#executeAffirmation", async () => {

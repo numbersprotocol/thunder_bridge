@@ -1,5 +1,7 @@
 const MinterBurnerProxy = artifacts.require("MinterBurnerProxy.sol");
-const ERC677MultiBridgeToken = artifacts.require("ERC677MultiBridgeTokenV2.sol");
+const ERC677MultiBridgeToken = artifacts.require(
+  "ERC677MultiBridgeTokenV2.sol"
+);
 
 const { ERROR_MSG } = require("./setup");
 
@@ -27,18 +29,18 @@ contract("MinterBurnerProxy", async accounts => {
     expect(balance.toString()).to.be.equal(Web3.utils.toWei("10"));
   });
 
-  it('can burn from a address', async () => {
+  it("can burn from a address", async () => {
     let account = web3.eth.accounts.create();
     await minter.mint(account.address, Web3.utils.toWei("10"), {
       from: accounts[0]
-    })
+    });
     await minter.burn(account.address, Web3.utils.toWei("5"), {
       from: accounts[0]
     }).should.be.fulfilled;
     let balance = await token.balanceOf(account.address);
 
     expect(balance.toString()).to.be.equal(Web3.utils.toWei("5"));
-  })
+  });
 
   it("can mint from operator", async () => {
     let operator = accounts[1];
@@ -59,13 +61,13 @@ contract("MinterBurnerProxy", async accounts => {
     await minter.addOperator(operator);
     await minter.mint(account.address, Web3.utils.toWei("10"), {
       from: accounts[0]
-    })
+    });
     await minter.burn(account.address, Web3.utils.toWei("5"), {
       from: operator
     }).should.be.fulfilled;
     let balance = await token.balanceOf(account.address);
     expect(balance.toString()).to.be.equal(Web3.utils.toWei("5"));
-  })
+  });
 
   it("cannot mint from removed operator", async () => {
     let operator = accounts[1];
@@ -80,7 +82,7 @@ contract("MinterBurnerProxy", async accounts => {
       .should.be.rejectedWith(ERROR_MSG);
   });
 
-  it('cannot burn from removed operator', async () => {
+  it("cannot burn from removed operator", async () => {
     let operator = accounts[1];
     let account = web3.eth.accounts.create();
 
@@ -91,7 +93,7 @@ contract("MinterBurnerProxy", async accounts => {
         from: operator
       })
       .should.be.rejectedWith(ERROR_MSG);
-  })
+  });
 
   it("can call token from owner", async () => {
     let owner = await token.owner();
@@ -125,7 +127,7 @@ contract("MinterBurnerProxy", async accounts => {
     await minter.mint(account.address, Web3.utils.toWei("100"), {
       from: accounts[0]
     });
-    await minter.burn(account.address, Web3.utils.toWei("100"))
+    await minter.burn(account.address, Web3.utils.toWei("100"));
     let balance = await token.balanceOf(account.address);
 
     expect(balance.toString()).to.be.equal(Web3.utils.toWei("0"));
@@ -144,17 +146,21 @@ contract("MinterBurnerProxy", async accounts => {
   it("cannot burn beyond per burn limit", async () => {
     await minter.setPerBurnLimit(web3.utils.toWei("10"));
     let account = web3.eth.accounts.create();
-    await minter
-      .mint(account.address, Web3.utils.toWei("50"), {
-        from: accounts[0]
-      });
-    await minter.burn(account.address, Web3.utils.toWei("11"), {
+    await minter.mint(account.address, Web3.utils.toWei("50"), {
       from: accounts[0]
-    }).should.be.rejectedWith(ERROR_MSG);
+    });
+    await minter
+      .burn(account.address, Web3.utils.toWei("11"), {
+        from: accounts[0]
+      })
+      .should.be.rejectedWith(ERROR_MSG);
   });
 
   it("can mint within operator day limit", async () => {
-    await minter.setOperatorDailyMintLimit(web3.utils.toWei("100"), accounts[0]);
+    await minter.setOperatorDailyMintLimit(
+      web3.utils.toWei("100"),
+      accounts[0]
+    );
     let account = web3.eth.accounts.create();
     await minter.mint(account.address, Web3.utils.toWei("10"), {
       from: accounts[0]
@@ -170,14 +176,17 @@ contract("MinterBurnerProxy", async accounts => {
     await minter.mint(account.address, Web3.utils.toWei("50"), {
       from: accounts[0]
     }).should.be.fulfilled;
-    await minter.burn(account.address, Web3.utils.toWei("10"))
+    await minter.burn(account.address, Web3.utils.toWei("10"));
     let balance = await token.balanceOf(account.address);
 
     expect(balance.toString()).to.be.equal(Web3.utils.toWei("40"));
   });
 
   it("cannot mint beyond operator day limit, but new day", async () => {
-    await minter.setOperatorDailyMintLimit(web3.utils.toWei("100"), accounts[0]);
+    await minter.setOperatorDailyMintLimit(
+      web3.utils.toWei("100"),
+      accounts[0]
+    );
     let account = web3.eth.accounts.create();
     await minter.mint(account.address, Web3.utils.toWei("100"), {
       from: accounts[0]
@@ -213,7 +222,10 @@ contract("MinterBurnerProxy", async accounts => {
   });
 
   it("cannot burn beyond operator day limit, but new day", async () => {
-    await minter.setOperatorDailyBurnLimit(web3.utils.toWei("100"), accounts[0]);
+    await minter.setOperatorDailyBurnLimit(
+      web3.utils.toWei("100"),
+      accounts[0]
+    );
     let account = web3.eth.accounts.create();
     await minter.mint(account.address, Web3.utils.toWei("150"), {
       from: accounts[0]
@@ -359,5 +371,39 @@ contract("MinterBurnerProxy", async accounts => {
     await minter.burn(account.address, Web3.utils.toWei("1"), {
       from: accounts[1]
     }).should.be.fulfilled;
+  });
+
+  it("can correctly increase thunder bridge supply", async () => {
+    await minter.mint(accounts[0], web3.utils.toWei("100")).should.be.fulfilled;
+    let balance = await minter.thunderBridgeSupply();
+    expect(balance.toString()).to.be.equal(web3.utils.toWei("100"));
+  });
+
+  it("can correctly decrease thunder bridge supply", async () => {
+    await minter.mint(accounts[0], web3.utils.toWei("100")).should.be.fulfilled;
+    await minter.burn(accounts[0], web3.utils.toWei("50")).should.be.fulfilled;
+    let balance = await minter.thunderBridgeSupply();
+    expect(balance.toString()).to.be.equal(web3.utils.toWei("50"));
+  });
+
+  it("does not increase thunder bridge supply when mint by other operator", async () => {
+    await minter.addOperator(accounts[1]);
+    await minter.mint(accounts[0], web3.utils.toWei("100"), {
+      from: accounts[1]
+    }).should.be.fulfilled;
+    let balance = await minter.thunderBridgeSupply();
+    expect(balance.toString()).to.be.equal(web3.utils.toWei("0"));
+  });
+
+  it("does not decrease thunder bridge supply when burn by other operator", async () => {
+    await minter.addOperator(accounts[1]);
+    await minter.mint(accounts[0], web3.utils.toWei("100"), {
+      from: accounts[0]
+    }).should.be.fulfilled;
+    await minter.burn(accounts[0], web3.utils.toWei("50"), {
+      from: accounts[1]
+    }).should.be.fulfilled;
+    let balance = await minter.thunderBridgeSupply();
+    expect(balance.toString()).to.be.equal(web3.utils.toWei("100"));
   });
 });
