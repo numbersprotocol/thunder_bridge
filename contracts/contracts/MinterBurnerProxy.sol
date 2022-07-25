@@ -21,7 +21,7 @@ contract MinterBurnerProxy is Ownable {
   mapping(address => uint256) public operatorDailyMintLimit;
 
   mapping(uint256 => uint256) public totalDailyMinted;
-  mapping(address => mapping(uint256 => uint256)) operatorDailyMinted;
+  mapping(address => mapping(uint256 => uint256)) public operatorDailyMinted;
 
   event PerMintLimitChanged(uint256 prev, uint256 current);
   event OperatorDailyMintLimitChanged(uint256 prev, uint256 current, address operator);
@@ -32,7 +32,7 @@ contract MinterBurnerProxy is Ownable {
   mapping(address => uint256) public operatorDailyBurnLimit;
 
   mapping(uint256 => uint256) public totalDailyBurned;
-  mapping(address => mapping(uint256 => uint256)) operatorDailyBurned;
+  mapping(address => mapping(uint256 => uint256)) public operatorDailyBurned;
 
   event PerBurnLimitChanged(uint256 prev, uint256 current);
   event OperatorDailyBurnLimitChanged(uint256 prev, uint256 current, address operator);
