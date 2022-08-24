@@ -5,10 +5,12 @@ import "./HomeBridgeErcToErcWithFee.sol";
 import "../../IMinterBurner.sol";
 
 contract HomeBridgeErcToErcWithFeeV2 is HomeBridgeErcToErcWithFee {
-    IMinterBurner public minterBurner;
-
     function setMinterBurner(IMinterBurner _minterBurner) external onlyOwner {
-        minterBurner = _minterBurner;
+        addressStorage[keccak256(abi.encodePacked("minterBurner"))] = _minterBurner;
+    }
+
+    function minterBurner() public returns (IMinterBurner) {
+        return IMinterBurner(addressStorage[keccak256(abi.encodePacked("minterBurner"))]);
     }
 
     function onTokenTransfer(address _from, uint256 _value, bytes _data) external returns(bool) {
@@ -22,7 +24,7 @@ contract HomeBridgeErcToErcWithFeeV2 is HomeBridgeErcToErcWithFee {
         uint256 value = _value.sub(fee);
 
         setTotalSpentPerDay(getCurrentDay(), totalSpentPerDay(getCurrentDay()).add(value));
-        minterBurner.burn(address(this), value);
+        minterBurner().burn(address(this), value);
         fireEventOnTokenTransfer(_from, value);
         return true;
     }
@@ -32,17 +34,17 @@ contract HomeBridgeErcToErcWithFeeV2 is HomeBridgeErcToErcWithFee {
 
         uint256 fee = depositFee(_value);
         if (_value <= fee) {
-            minterBurner.mint(feeReceiver(), _value);
+            minterBurner().mint(feeReceiver(), _value);
             return true;
         }
 
         if (fee != 0) {
-            minterBurner.mint(feeReceiver(), fee);
+            minterBurner().mint(feeReceiver(), fee);
         }
 
         uint256 value = _value.sub(fee);
         if (value != 0) {
-            minterBurner.mint(_recipient, value);
+            minterBurner().mint(_recipient, value);
         }
 
         return true;
