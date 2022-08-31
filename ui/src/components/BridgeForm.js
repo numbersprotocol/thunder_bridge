@@ -19,7 +19,6 @@ export const BridgeForm = ({
   maxPerTx,
   minPerTx,
   buttonEnabled,
-  foreignNetwork,
 }) => (
   <div className="form-container">
     {displayArrow && (
@@ -107,8 +106,7 @@ export const BridgeForm = ({
                 value={recipient}
               />
             </div>
-            {(currency !== "TT" ||
-              (currency === "TT" && foreignNetwork === "HECO")) && (
+            {currency !== "TT" && (
               <div className="bridge-form-input-wrapper-warning">
                 <img
                   className="bridge-form-input-wrapper-exclamation"

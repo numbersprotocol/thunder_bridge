@@ -564,7 +564,6 @@ class Bridge extends React.Component {
                   maxPerTx={store.maxPerTx}
                   minPerTx={store.minPerTx}
                   buttonEnabled={transferButtonEnabled}
-                  foreignNetwork={foreignStore.networkName}
                 />
                 <BridgeNetwork
                   balance={
