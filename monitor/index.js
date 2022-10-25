@@ -208,13 +208,14 @@ async function checkVBalances(token) {
 async function updateGasPrice() {
   const gas = await foreignWeb3.eth.getGasPrice();
   const gasBN = new BN(gas)
-  const tenGWei = new BN(Web3.utils.toWei('10', 'gwei'))
-  const slow = gasBN.gt(tenGWei) ? gasBN.sub(tenGWei) : gasBN
-  const fast = gasBN.add(tenGWei)
+  const GWei = (x) => new BN(Web3.utils.toWei(x, 'gwei'))
+  const slow = gasBN.gt(GWei("11")) ? gasBN : GWei("11")
+  const average = gasBN.gt(GWei("15")) ? gasBN : GWei("15")
+  const fast = average.add(GWei("5")).gt(GWei("20")) ? average.add(GWei("5")) : GWei("20")
 
   const gasPrice = {
     slow: Web3.utils.fromWei(slow.toString(), "gwei"),
-    average: Web3.utils.fromWei(gasBN.toString(), "gwei"),
+    average: Web3.utils.fromWei(average.toString(), "gwei"),
     fast: Web3.utils.fromWei(fast.toString(), "gwei")
   }
   await redis.updateGasPrice(gasPrice)
