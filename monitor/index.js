@@ -211,7 +211,7 @@ async function updateGasPrice() {
   const GWei = (x) => new BN(Web3.utils.toWei(x, 'gwei'))
   const slow = gasBN.gt(GWei("11")) ? gasBN : GWei("11")
   const average = gasBN.gt(GWei("15")) ? gasBN : GWei("15")
-  const fast = average.add(GWei("5")).gt(GWei("20")) ? average.add(GWei("5")) : GWei("20")
+  const fast = average.add(GWei("5"))
 
   const gasPrice = {
     slow: Web3.utils.fromWei(slow.toString(), "gwei"),
