@@ -37,8 +37,7 @@ function main({ HOME_RPC_URL, FOREIGN_RPC_URL, HOME_BRIDGE_ADDRESS, FOREIGN_BRID
     const tokenAddress = await homeBridge.methods.erc677token().call()
     const tokenContract = new web3Home.eth.Contract(ERC677_ABI, tokenAddress)
     const minterBurnerProxyContract = new web3Home.eth.Contract(MINTER_BURNER_PROXY_ABI, MINTER_BURNER_PROXY_ADDRESS)
-    const totalSupply = await minterBurnerProxyContract.methods.thunderBridgeSupply().call()
-    // const totalSupply = await tokenContract.methods.totalSupply().call()
+    const totalSupply = MINTER_BURNER_PROXY_ADDRESS ? await minterBurnerProxyContract.methods.thunderBridgeSupply().call() : await tokenContract.methods.totalSupply().call()
     const tokenBalance = new BN(await tokenContract.methods.balanceOf(HOME_BRIDGE_ADDRESS).call())
     const homeTotalSupplyBN = new BN(totalSupply)
 
