@@ -60,6 +60,7 @@ let config = existsSync("config.json") ? JSON.parse(readFileSync("config.json", 
     "UPDATE_PERIOD": parseInt(env.UPDATE_PERIOD),
     "HOME_MAX_GAS_PRICE_LIMIT": env.HOME_MAX_GAS_PRICE_LIMIT,
     "FOREIGN_MAX_GAS_PRICE_LIMIT": env.FOREIGN_MAX_GAS_PRICE_LIMIT,
+    "MINTER_BURNER_PROXY_ADDRESS": env.MINTER_BURNER_PROXY_ADDRESS,
   }]))
 
 const foreignWeb3 = new Web3(new HttpRetryProvider(process.env.FOREIGN_RPC_URL.split(",")))
