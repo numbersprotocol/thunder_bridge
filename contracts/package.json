@@ -15,24 +15,27 @@
   "dependencies": {
     "ganache-cli": "^6.1.0",
     "json5": "^2.1.1",
-    "openzeppelin-eth": "2.0.2",
+    "openzeppelin-eth": "^2.0.2",
     "openzeppelin-solidity": "^1.10.0",
-    "sha3": "2.1.1",
-    "truffle": "^5.1.50",
+    "sha3": "^2.1.1",
+    "truffle": "^5.2.5",
     "truffle-contract": "^4.0.31",
     "web3-utils": "^1.0.0-beta.34",
-    "zos-lib": "2.2.3"
+    "zos-lib": "^2.2.3"
   },
   "devDependencies": {
+    "@truffle/hdwallet-provider": "^1.2.6",
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
     "chai-bignumber": "^2.0.2",
     "chai-bn": "^0.2.1",
     "eth-gas-reporter": "^0.1.12",
     "nodemon": "^1.17.3",
-    "scrypt": "6.0.3",
+    "scrypt": "^6.0.3",
     "solidity-coverage": "^0.4.15",
-    "truffle-flattener": "^1.2.3",
-    "truffle-hdwallet-provider": "1.0.8"
+    "truffle-flattener": "^1.2.3"
+  },
+  "volta": {
+    "node": "10.24.1"
   }
 }
