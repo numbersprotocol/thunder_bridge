@@ -4,6 +4,7 @@ const JSON5 = require("json5");
 
 let infuraProjectId = null,
   infuraProjectSecret = null;
+let etherscanSecret = null;
 try {
   const localConfStr = fs.readFileSync("local.jsonc", { encoding: "utf8" });
   const localConf = JSON5.parse(localConfStr);
@@ -14,6 +15,10 @@ try {
   t = localConf["infura_project_secret"];
   if (t) {
     infuraProjectSecret = t;
+  }
+  t = localConf["etherscan_secret"];
+  if (t) {
+    etherscanSecret = t;
   }
 } catch (err) {
   if (err.code !== "ENOENT") {
@@ -212,5 +217,11 @@ module.exports = {
       currency: "USD",
       gasPrice: 1
     }
+  },
+  plugins: [
+    'truffle-plugin-verify'
+  ],
+  api_keys: {
+    etherscan: etherscanSecret
   }
 };
